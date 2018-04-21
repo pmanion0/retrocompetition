@@ -1,0 +1,10 @@
+aws_access_key: <NEED_TO_FIGURE_PARAMETERIZATION>
+aws_secret_key: <NEED_TO_FIGURE_PARAMETERIZATION>
+key_name: <NEED_TO_FIGURE_PARAMETERIZATION>
+aws_region: us-east-1
+aws_zone: us-east-1f
+vpc_id: vpc-f7644a8e
+ami_id: ami-405ade3a # Base CUDA9 AMI
+instance_type: p2.xlarge
+spot_price: 0.50
+my_local_cidr_ip: <NEED_TO_FIGURE_PARAMETERIZATION>
