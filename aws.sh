@@ -25,7 +25,7 @@ elif [[ $ACTION == "setup" ]]; then
   #  cd .ssh
   #  put $GITHUB_KEY
   #  put $GITHUB_KEY.pub
-  #  put remote_files/config
+  #  put ansible/remote_files/config
   #  cd ..
   #  mkdir .aws
   #  cd .aws
