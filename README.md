@@ -13,7 +13,7 @@ Here are simplified instructions to get up and runnning with the Gym environment
 
 1. **Buy Sonic on Steam:** I just bought Sonic the Hedgehog 1 on Steam for now - it's $5
 
-2. **Install Lua:** see [these instructions](https://github.com/openai/retro) for the Homebrew version or below if you want to skip Homebrew
+2. **Install Lua 5.1:** see [these instructions](https://github.com/openai/retro) for the Homebrew version or below if you want to skip Homebrew
 
 3. **Install gym-retro:** `pip install gym-retro`
 
