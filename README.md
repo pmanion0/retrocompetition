@@ -11,23 +11,42 @@ Contender for the OpenAI Retro Competition!
 
 Here are simplified instructions to get up and runnning with the Gym environment
 
-1. **Buy Sonic on Steam:** I just bought Sonic the Hedgehog 1 on Steam for now - it's $5
+## Install Software
 
-2. **Install Lua 5.1:** see [these instructions](https://github.com/openai/retro) for the Homebrew version or below if you want to skip Homebrew
+1. **Install Lua 5.1:** see [these instructions](https://github.com/openai/retro) for the Homebrew version or below if you want to skip Homebrew
 
-3. **Install gym-retro:** `pip install gym-retro`
+2. **Install Docker:** simply install the app [for Mac](https://www.docker.com/docker-mac)
 
-4. **Clone Retro Competition Repo:** `git clone --recursive https://github.com/openai/retro-contest.git`
+3. **Install Steam:** download the installer [here](https://store.steampowered.com/about/)
 
-5. **Install Retro Competition:** `pip install -e "retro-contest/support[docker,rest]"`
+## Download Packages / Code
 
-4. **Download Sega Games from Steam:** `python -m retro.import.sega_classics`
+1. **Clone Our Repo:** `git pull git@github.com:theforager/retrocompetition.git`
 
-5. **SteamGuard:** I just left this blank, and it worked fine
+2. **Install gym-retro:** `pip install gym-retro`
 
-6. **Create Random Agent Script:** use the script [a little down this page](https://contest.openai.com/details) above the rings, but I had to change the import from `from retro_contest.local import make` to `from retro import make`
+3. **Clone Retro Competition Repo:** `git clone --recursive https://github.com/openai/retro-contest.git`
 
-7. **Run It:** with `python random-agent-contest.py`
+4. **Install Retro Competition:** `pip install -e "retro-contest/support[docker,rest]"`
+
+## Buy Sonic on Steam and Import
+
+1. **Buy Sonic on Steam:** Sonic the Hedgehog 1 is $5 on Steam
+
+2. **Import Sonic into Retro Gym:** run this code `python -m retro.import.sega_classics` (you can leave the SteamGuard field empty if you're already logged in on this computer)
+
+## Setup Dockers
+
+1. **Pull Remote Environment for Testing:** pull the Docker `docker pull openai/retro-env` and then tag it `docker tag openai/retro-env remote-env`
+
+
+## Test It Out!
+
+1. **Run It Locally:** with `python random-agent/random-agent-contest.py`
+
+2. **Test Building the Docker:** with `./docker.sh build random-agent v1`
+
+3. **Test Run the Docker:** with `./docker.sh test random-agent v1`
 
 
 
