@@ -1,4 +1,4 @@
-from retro import make
+from retro_contest.local import make
 
 
 def main():
