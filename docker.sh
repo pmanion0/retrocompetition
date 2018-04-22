@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DOCKER_REGISTRY=.
+DOCKER_REGISTRY=retrocontestajvidhoekmrcpqzt.azurecr.io
 
 ACTION=$1
 AGENT_FOLDER=$2
@@ -15,7 +15,9 @@ elif [[ -z "$AGENT_FOLDER" ]] || [[ -z "$AGENT_VERSION" ]]; then
 fi
 
 if [[ "$ACTION" == "build" ]]; then
-  docker build -f $AGENT_FOLDER/box.docker -t $DOCKER_REGISTRY/$AGENT_FOLDER:$AGENT_VERSION .
+  cd $AGENT_FOLDER
+  docker build -f box.docker -t $DOCKER_REGISTRY/$AGENT_FOLDER:$AGENT_VERSION .
+  cd -
 elif [[ "$ACTION" == "push" ]]; then
   docker push $DOCKER_REGISTRY/$AGENT_FOLDER:$AGENT_VERSION
 fi
