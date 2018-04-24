@@ -27,7 +27,7 @@ Here are simplified instructions to get up and runnning with the Gym environment
 
 3. **Clone Retro Competition Repo:** `git clone --recursive https://github.com/openai/retro-contest.git`
 
-4. **Install Retro Competition:** `pip install -e "retro-contest/support[docker,rest]"`
+4. **Install Retro Competition:** `pip install -e "retro-contest/support[docker,rest]"` (you can remove the brackets to also install the gym_remote package, which I think is preferable but isn't stated in instructions for some reason)
 
 ## Buy Sonic on Steam and Import
 
