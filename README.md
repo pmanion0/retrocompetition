@@ -39,6 +39,8 @@ Here are simplified instructions to get up and runnning with the Gym environment
 
 1. **Pull Remote Environment for Testing:** pull the Docker `docker pull openai/retro-env` and then tag it `docker tag openai/retro-env remote-env`
 
+2. **Login to Remote Docker:** run `docker login retrocontestajvidhoekmrcpqzt.azurecr.io --username retrocontestajvidhoekmrcpqzt  --password 9zqhOlFc=EohEXrXfWi6mKbR9wMAXTB4` to connect to our remote docker environment using our team username and password
+
 
 ## Test It Out!
 
