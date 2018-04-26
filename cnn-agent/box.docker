@@ -1,0 +1,3 @@
+FROM openai/retro-agent:pytorch
+ADD cnn-agent-contest.py .
+CMD ["python", "-u", "/root/compo/cnn-agent-contest.py"]
