@@ -60,7 +60,7 @@ class BasicConvolutionNetwork(nn.Module):
 
         if random() < self.epsilon:
             action = np.array([0] * self.action_count)
-            random_index = randint(0, self.action_count)
+            random_index = randint(0, self.action_count-1)
             action[random_index] = 1
 
         return action
