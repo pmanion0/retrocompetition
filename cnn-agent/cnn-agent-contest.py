@@ -28,7 +28,7 @@ def main():
     obs = env.reset()
     screen = util.get_screen_variable(obs)
 
-    while cntr < 1000:
+    while cntr < 10000:
         cntr += 1
 
         # Get the Q value for the current screen
