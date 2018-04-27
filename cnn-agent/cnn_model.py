@@ -1,9 +1,36 @@
+import numpy as np
+
+from random import random, randint
 from torch import nn
 
-class BasicConvolutionNetwork:
+class BasicConvolutionNetwork(nn.Module):
 
-    def __init__(self):
-        ''' Screen is 3x224x320 '''
+    def __init__(self, epsilon=0.05):
+        ''' Screen (D,H,W): 3x224x320
+            Buttons: [B, A, MODE, START, UP, DOWN, LEFT, RIGHT, C, Y, X, Z]
+            Actions: [UP, DOWN, LEFT, RIGHT, (UP,LEFT), (UP,RIGHT), (DOWN,LEFT),
+                      (DOWN,RIGHT), A, B, C, X, Y, Z, (A,B), (B,C), (A,X),
+                      (B,Y), (C,Z), (X,Y), (Y,Z)]
+            '''
+        super(BasicConvolutionNetwork, self).__init__()
+
+        self.epsilon = epsilon
+        self.action_count = 12
+
+        self.action_index_to_buttom_map = {
+            0: ["UP"],
+            1: ["DOWN"],
+            2: ["LEFT"],
+            3: ["RIGHT"],
+            4: ["UP","LEFT"],
+            5: ["UP","RIGHT"],
+            6: ["DOWN","LEFT"],
+            7: ["DOWN","RIGHT"],
+        }
+
+        self.button_index_list = ["B", "A", "MODE", "START", "UP", "DOWN",
+            "LEFT", "RIGHT", "C", "Y", "X", "Z"]
+
         self.conv_layer = nn.Sequential(
             nn.Conv2d(3, 10, 7, padding=3),
             nn.ReLU(),
@@ -17,9 +44,9 @@ class BasicConvolutionNetwork:
         )
 
         self.fc_layer = nn.Sequential(
-            nn.Linear(64*7*10, 12),
-            nn.Sigmoid()
+            nn.Linear(64*7*10, self.action_count)
         )
+
 
     def forward(self, x):
         out = self.conv_layer(x)
@@ -27,5 +54,29 @@ class BasicConvolutionNetwork:
         out = self.fc_layer(out)
         return out
 
-    def backward(self, x):
-        pass
+    def get_action(self, q_values):
+        """ Return an epsilon-optimal policy given the Q values """
+        action = self.get_best_q_action(q_values)
+
+        if random() < self.epsilon:
+            action = np.array([0] * self.action_count)
+            random_index = randint(0, self.action_count)
+            action[random_index] = 1
+
+        return action
+
+
+    def get_best_q_action(self, q_values):
+        output = np.array([0] * self.action_count)
+
+        action_index = int(q_values.max(1)[1])
+        buttons = []
+        if action_index > 7:
+            buttons += ["A"]
+            action_index -= 7
+        buttons += self.action_index_to_buttom_map[action_index]
+
+        for b in buttons:
+            output[self.button_index_list.index(b)] = 1
+
+        return output
