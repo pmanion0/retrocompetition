@@ -2,23 +2,28 @@
 # Basic provisioning example
 - name: Create AWS resources
   hosts: localhost
+  connection: local
   strategy: debug
   vars_files:
     - group_vars/all
-  connection: local
   gather_facts: False
   tasks:
+
+  - name: Get public IP address for this computer
+    ipify_facts:
+    register: my_public_ip
+
   - name: Create a security group
     ec2_group:
       name: ansible
       description: "Ansible Security Group"
-      region: "{{aws_region}}"
-      vpc_id: "{{vpc_id}}"
-      aws_access_key: "{{aws_access_key}}"
-      aws_secret_key: "{{aws_secret_key}}"
+      region: "{{ aws_region }}"
+      #vpc_id: "{{ vpc_id }}"
+      # aws_access_key: # Uses environment variable $AWS_ACCESS_KEY_ID
+      # aws_secret_key: # Uses environment variable $AWS_SECRET_ACCESS_KEY
       rules:
         - proto: all
-          cidr_ip: "{{my_local_cidr_ip}}"
+          cidr_ip: "{{ ipify_public_ip + '/32' }}"
         - proto: all
           group_name: ansible
       rules_egress:
@@ -28,23 +33,23 @@
 
   - name: Create an EC2 instance
     ec2:
-      aws_access_key: "{{aws_access_key}}"
-      aws_secret_key: "{{aws_secret_key}}"
-      key_name: "{{key_name}}"
-      region: "{{aws_region}}"
-      zone: "{{aws_zone}}"
-      group_id: "{{firewall.group_id}}"
-      instance_type: "{{instance_type}}"
-      image: "{{ami_id}}"
+      # aws_access_key: # Uses environment variable $AWS_ACCESS_KEY_ID
+      # aws_secret_key: # Uses environment variable $AWS_SECRET_ACCESS_KEY
+      key_name: "{{ ssh_key_name }}"
+      region: "{{ aws_region }}"
+      zone:  #"{{ aws_zone }}"
+      group_id: "{{ firewall.group_id }}"
+      instance_type: "{{ instance_type }}"
+      image: "{{ ami_id }}"
       wait: yes
-      volumes:
-        - device_name: /dev/xvdf
-          snapshot: snap-09140a5b20956af9f
-          volume_size: 100
-          volume_type: gp2
-          delete_on_termination: true
+      #volumes:
+      #  - device_name: /dev/xvdf
+      #    snapshot: snap-09140a5b20956af9f
+      #    volume_size: 100
+      #    volume_type: gp2
+      #    delete_on_termination: true
       exact_count: 1
-      spot_price: "{{spot_price}}"
+      spot_price: "{{ spot_price }}"
       count_tag:
          Name: deep-learning
       instance_tags:
