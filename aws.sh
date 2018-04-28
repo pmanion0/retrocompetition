@@ -7,17 +7,16 @@
 #  Make sure you have SSH keys for AWS
 #  and GitHub in the locations below.
 #
-#  !!! YOU ALSO NEED TWO ENVIRONMENT VARS
+#  !!! YOU ALSO NEED THREE ENVIRONMENT VARS
 #  TO BE SET FOR YOUR AWS CREDENTIALS !!
 #     - $AWS_ACCESS_KEY_ID
 #     - $AWS_SECRET_ACCESS_KEY
+#     - $AWS_KEY_NAME
 #
 # --------------------------------------- #
 
-AWS_KEY_NAME=flaming_buddha
 GITHUB_KEY=~/.ssh/github_rsa
 #AWS_CREDENTIALS=~/.aws/credentials # Needed for S3 access
-AWS_SSH_KEY=~/.ssh/$AWS_KEY_NAME.pem
 
 # --------------------------------------- #
 #         RUN PARAMETER CHECKS            #
@@ -38,15 +37,19 @@ if [[ $ACTION != "launch" && -z "$EC2_IP_ADDRESS" ]]; then
   exit 1
 fi
 
-if [[ -z "$AWS_ACCESS_KEY_ID" || -z "$AWS_SECRET_ACCESS_KEY" ]]; then
+if [[ -z "$AWS_ACCESS_KEY_ID" || -z "$AWS_SECRET_ACCESS_KEY" || -z "$AWS_KEY_NAME" ]]; then
   echo "ERROR: You must set 2 environment variables for AWS credentials:"
-  echo "  - \$AWS_ACCESS_KEY_ID"
-  echo "  - \$AWS_SECRET_ACCESS_KEY"
+  echo "  - \$AWS_ACCESS_KEY_ID: secret access ID from EC2 console"
+  echo "  - \$AWS_SECRET_ACCESS_KEY: secret key password from EC2 console"
+  echo "  - \$AWS_KEY_NAME: name of SSH key without .pem (located at ~/.ssh/$AWS_KEY_NAME.pem)"
+  exit 1
 fi
 
 # --------------------------------------- #
 #  RUN AWS LAUNCH / SETUP / CONNECT       #
 # --------------------------------------- #
+
+AWS_SSH_KEY=~/.ssh/$AWS_KEY_NAME.pem
 
 if [[ $ACTION == "launch" ]]; then
 
@@ -84,8 +87,9 @@ EOF
     git clone git@github.com:theforager/retrocompetition.git
 
     # Turn off stupid Anaconda presentation plugin
-    jupyter-nbextension disable nbpresent --py --sys-prefix
-    jupyter-serverextension disable nbpresent --py --sys-prefix
+      # This is broken with the latest AMI
+      #jupyter-nbextension disable nbpresent --py --sys-prefix
+      #jupyter-serverextension disable nbpresent --py --sys-prefix
 EOF
 
 elif [[ $ACTION == "connect" ]]; then
