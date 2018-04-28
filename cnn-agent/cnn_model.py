@@ -55,18 +55,23 @@ class BasicConvolutionNetwork(nn.Module):
         return out
 
     def get_action(self, q_values):
-        """ Return an epsilon-optimal policy given the Q values """
+        """ Return an epsilon-greedy optimal policy given the Q values """
         action = self.get_best_q_action(q_values)
 
         if random() < self.epsilon:
-            action = np.array([0] * self.action_count)
-            random_index = randint(0, self.action_count-1)
-            action[random_index] = 1
+            action = self.get_random_action()
 
         return action
 
+    def get_random_action(self):
+        """ Return an action array with a single random action """
+        action = np.array([0] * self.action_count)
+        random_index = randint(0, self.action_count-1)
+        action[random_index] = 1
+        return action
 
     def get_best_q_action(self, q_values):
+        """ Return an action array with the high Q-value action chosen """
         output = np.array([0] * self.action_count)
 
         action_index = int(q_values.max(1)[1])
