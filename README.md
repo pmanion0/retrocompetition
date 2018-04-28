@@ -41,6 +41,16 @@ Here are simplified instructions to get up and runnning with the Gym environment
 
 2. **Login to Remote Docker:** run `docker login retrocontestajvidhoekmrcpqzt.azurecr.io --username retrocontestajvidhoekmrcpqzt  --password 9zqhOlFc=EohEXrXfWi6mKbR9wMAXTB4` to connect to our remote docker environment using our team username and password
 
+## Add AWS Environment Variables (Skip if Not Using AWS)
+
+1. **Export Environment Variables:** add the following lines to your shell setup script of choice, e.g. `~/.bash_profile` on Mac, to define environment variables needed for AWS in the `aws.sh` script and Ansible:
+
+`export AWS_ACCESS_KEY_ID=...` : secret access ID from EC2 console
+
+`export AWS_SECRET_ACCESS_KEY=...` : secret key password from EC2 console
+
+`export AWS_KEY_NAME=...` : name of SSH key without .pem (located at `~/.ssh/**$AWS_KEY_NAME**.pem`)
+
 
 ## Test It Out!
 
