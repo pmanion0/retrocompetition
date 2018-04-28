@@ -52,6 +52,26 @@ if [[ -z "$AWS_ACCESS_KEY_ID" || -z "$AWS_SECRET_ACCESS_KEY" || -z "$AWS_KEY_NAM
 fi
 
 # --------------------------------------- #
+#  CREATE GITHUB RSA KEY CHECK TO UPLOAD  #
+# --------------------------------------- #
+
+if [[ ! -f ansible/remote_files/known_hosts ]]; then
+  echo "NOTE: ansible/remote_files/known_hosts not found! This is needed for AWS automation."
+  echo "  Would you like to create it?"
+  select yn in "Yes" "No"; do
+    case $yn in
+        Yes )
+            echo "Adding Github.com to ansible/remote_files/known_hosts"
+            ssh-keyscan github.com >> ansible/remote_files/known_hosts
+            break;;
+        No )
+            break;;
+    esac
+  done
+fi
+
+
+# --------------------------------------- #
 #  RUN AWS LAUNCH / SETUP / CONNECT       #
 # --------------------------------------- #
 
@@ -78,7 +98,7 @@ elif [[ $ACTION == "setup" ]]; then
     cd .ssh
     put $GITHUB_KEY
     put $GITHUB_KEY.pub
-    put ansible/remote_files/config
+    put ansible/remote_files/known_hosts
     cd ..
       #mkdir .aws
       #cd .aws
