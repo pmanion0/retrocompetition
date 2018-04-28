@@ -23,7 +23,7 @@ GITHUB_KEY=~/.ssh/github_rsa
 # --------------------------------------- #
 
 ACTION=$1
-EC2_IP_ADDRESS=$2
+OPTION=$2
 
 if [[ -z "$ACTION" ]]; then
   echo "ERROR: Run by providing [launch|setup|connect]"
@@ -31,14 +31,20 @@ if [[ -z "$ACTION" ]]; then
   exit 1
 fi
 
-if [[ $ACTION != "launch" && -z "$EC2_IP_ADDRESS" ]]; then
+if [[ $ACTION == "launch" && -z "$OPTION" ]]; then
+  echo "NOTE: No instance type provided - assuming p2.xlarge"
+  echo "EXAMPLE: ./aws.sh launch p3.8xlarge"
+  OPTION="p2.xlarge"
+fi
+
+if [[ $ACTION != "launch" && -z "$OPTION" ]]; then
   echo "ERROR: Please provide EC2 IP after setup command"
   echo "EXAMPLE: ./aws.sh connect 12.32.46.83"
   exit 1
 fi
 
 if [[ -z "$AWS_ACCESS_KEY_ID" || -z "$AWS_SECRET_ACCESS_KEY" || -z "$AWS_KEY_NAME" ]]; then
-  echo "ERROR: You must set 2 environment variables for AWS credentials:"
+  echo "ERROR: You must set 3 environment variables for AWS credentials:"
   echo "  - \$AWS_ACCESS_KEY_ID: secret access ID from EC2 console"
   echo "  - \$AWS_SECRET_ACCESS_KEY: secret key password from EC2 console"
   echo "  - \$AWS_KEY_NAME: name of SSH key without .pem (located at ~/.ssh/$AWS_KEY_NAME.pem)"
@@ -52,13 +58,15 @@ fi
 AWS_SSH_KEY=~/.ssh/$AWS_KEY_NAME.pem
 
 if [[ $ACTION == "launch" ]]; then
+  INSTANCE_TYPE=$OPTION
 
   echo "LAUNCHING..."
   ansible-playbook ansible/ansible-aws.yml \
     --private-key=$AWS_SSH_KEY \
-    --extra-vars "ssh_key_name=$AWS_KEY_NAME"
+    --extra-vars "ssh_key_name=$AWS_KEY_NAME instance_type=$INSTANCE_TYPE"
 
 elif [[ $ACTION == "setup" ]]; then
+  EC2_IP_ADDRESS=$OPTION
 
   if [[ -z "$EC2_IP_ADDRESS" ]]; then
     echo "ERROR: Please provide EC2 IP after setup command"
@@ -93,6 +101,7 @@ EOF
 EOF
 
 elif [[ $ACTION == "connect" ]]; then
+  EC2_IP_ADDRESS=$OPTION
 
   echo "CONNECTING TO AWS..."
   ssh -i $AWS_SSH_KEY -L 7777:127.0.0.1:8888 ubuntu@$EC2_IP_ADDRESS

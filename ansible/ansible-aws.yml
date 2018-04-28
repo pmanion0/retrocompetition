@@ -5,7 +5,7 @@
   connection: local
   strategy: debug
   vars_files:
-    - group_vars/all
+    - config_vars/{{ instance_type }}
   gather_facts: False
   tasks:
 
