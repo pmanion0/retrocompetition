@@ -55,6 +55,7 @@ fi
 #  CREATE GITHUB RSA KEY CHECK TO UPLOAD  #
 # --------------------------------------- #
 
+# If checks whether known_hosts file already exists (this file is personalzied and NOT in the repo!)
 if [[ ! -f ansible/remote_files/known_hosts ]]; then
   echo "NOTE: ansible/remote_files/known_hosts not found! This is needed for AWS automation."
   echo "  Would you like to create it?"
