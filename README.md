@@ -44,7 +44,7 @@ Here are simplified instructions to get up and runnning with the Gym environment
 
 ## Test It Out!
 
-1. **Run It Locally:** with `python random-agent/random-agent-contest.py`
+1. **Run It Locally:** with `python random-agent/random-agent-contest.py local`
 
 2. **Test Building the Docker:** with `./docker.sh build random-agent v1`
 
