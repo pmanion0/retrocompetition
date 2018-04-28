@@ -56,11 +56,10 @@ class BasicConvolutionNetwork(nn.Module):
 
     def get_action(self, q_values):
         """ Return an epsilon-greedy optimal policy given the Q values """
-        action = self.get_best_q_action(q_values)
-
         if random() < self.epsilon:
             action = self.get_random_action()
-
+        else:
+            action = self.get_best_q_action(q_values)
         return action
 
     def get_random_action(self):
