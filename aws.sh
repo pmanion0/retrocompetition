@@ -101,20 +101,11 @@ elif [[ $ACTION == "setup" ]]; then
     put $GITHUB_KEY.pub
     put ansible/remote_files/known_hosts
     put ansible/remote_files/config
-    cd ..
-      #mkdir .aws
-      #cd .aws
-      #put $AWS_CREDENTIALS
 EOF
 
   ssh -i $AWS_SSH_KEY ubuntu@$EC2_IP_ADDRESS << EOF
     # Switch to PyTorch environment
     source activate pytorch_p36
-
-    # Mount the EBS data with stored X-ray images
-      #sudo mkdir /user
-      #sudo mount /dev/xvdf /user
-      #cd /user
 
     # Clone the Retro Competition repository
     git clone git@github.com:theforager/retrocompetition.git
@@ -125,11 +116,6 @@ EOF
     # Clone the Retro Contest repo and install
     git clone --recursive https://github.com/openai/retro-contest.git
     pip install -e "retro-contest/support[docker,rest]
-
-    # Turn off stupid Anaconda presentation plugin
-      # This is broken with the latest AMI
-      #jupyter-nbextension disable nbpresent --py --sys-prefix
-      #jupyter-serverextension disable nbpresent --py --sys-prefix
 EOF
 
   # Install the Sonic the Hedgehog ROM (if available)
