@@ -135,6 +135,7 @@ EOF
   # Install the Sonic the Hedgehog ROM (if available)
   if [[ -f ansible/remote_files/SonicTheHedgehog-Genesis/rom.md ]]; then
     sftp -i $AWS_SSH_KEY ubuntu@$EC2_IP_ADDRESS << EOF
+      # Install Sonic to the PyTorch 3.6 Environment (will not work elsewhere!)
       cd /home/ubuntu/anaconda3/envs/pytorch_p36/lib/python3.6/site-packages/retro/data/SonicTheHedgehog-Genesis/
       put ansible/remote_files/SonicTheHedgehog-Genesis/rom.md
 EOF
