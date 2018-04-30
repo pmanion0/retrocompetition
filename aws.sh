@@ -108,6 +108,9 @@ elif [[ $ACTION == "setup" ]]; then
 EOF
 
   ssh -i $AWS_SSH_KEY ubuntu@$EC2_IP_ADDRESS << EOF
+    # Switch to PyTorch environment
+    source activate pytorch_p36
+
     # Mount the EBS data with stored X-ray images
       #sudo mkdir /user
       #sudo mount /dev/xvdf /user
@@ -132,7 +135,7 @@ EOF
   # Install the Sonic the Hedgehog ROM (if available)
   if [[ -f ansible/remote_files/SonicTheHedgehog-Genesis/rom.md ]]; then
     sftp -i $AWS_SSH_KEY ubuntu@$EC2_IP_ADDRESS << EOF
-      cd /home/ubuntu/anaconda3/lib/python3.6/site-packages/retro/data/SonicTheHedgehog-Genesis/
+      cd /home/ubuntu/anaconda3/envs/pytorch_p36/lib/python3.6/site-packages/retro/data/SonicTheHedgehog-Genesis/
       put ansible/remote_files/SonicTheHedgehog-Genesis/rom.md
 EOF
   fi
