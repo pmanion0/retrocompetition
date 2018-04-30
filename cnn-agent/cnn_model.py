@@ -1,3 +1,4 @@
+import torch
 import numpy as np
 
 from random import random, randint
@@ -84,3 +85,22 @@ class BasicConvolutionNetwork(nn.Module):
             output[self.button_index_list.index(b)] = 1
 
         return output
+
+    def action_array_to_string(self, action_array):
+        ''' TODO: '''
+        return ' + '.join([
+            self.button_index_list[index]
+            for index, value in enumerate(action_array)
+            if value == 1
+        ])
+
+    def save_model(self, path):
+        torch.save({
+            'model': self.state_dict(),
+            'epsilon': self.epsilon
+        }, path)
+
+    def load_model(self, path):
+        loaded_dict = torch.load(path)
+        self.epsilon = loaded_dict['epsilon']
+        self.load_state_dict(loaded_dict['model'])
