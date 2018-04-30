@@ -100,6 +100,7 @@ elif [[ $ACTION == "setup" ]]; then
     put $GITHUB_KEY
     put $GITHUB_KEY.pub
     put ansible/remote_files/known_hosts
+    put ansible/remote_files/config
     cd ..
       #mkdir .aws
       #cd .aws
@@ -115,11 +116,26 @@ EOF
     # Clone the Retro Competition repository
     git clone git@github.com:theforager/retrocompetition.git
 
+    # Install the Retro Gym packages
+    pip install gym-retro
+
+    # Clone the Retro Contest repo and install
+    git clone --recursive https://github.com/openai/retro-contest.git
+    pip install -e "retro-contest/support[docker,rest]
+
     # Turn off stupid Anaconda presentation plugin
       # This is broken with the latest AMI
       #jupyter-nbextension disable nbpresent --py --sys-prefix
       #jupyter-serverextension disable nbpresent --py --sys-prefix
 EOF
+
+  # Install the Sonic the Hedgehog ROM (if available)
+  if [[ -f ansible/remote_files/SonicTheHedgehog-Genesis/rom.md ]]; then
+    sftp -i $AWS_SSH_KEY ubuntu@$EC2_IP_ADDRESS << EOF
+      cd /home/ubuntu/anaconda3/lib/python3.6/site-packages/retro/data/SonicTheHedgehog-Genesis/
+      put ansible/remote_files/SonicTheHedgehog-Genesis/rom.md
+EOF
+  fi
 
 elif [[ $ACTION == "connect" ]]; then
   EC2_IP_ADDRESS=$OPTION
