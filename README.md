@@ -19,6 +19,8 @@ Here are simplified instructions to get up and runnning with the Gym environment
 
 3. **Install Steam:** download the installer [here](https://store.steampowered.com/about/)
 
+4. **Install PyTorch:** run with `pip install torch torchvision` (make sure you have torch 0.40 or some code may not run)
+
 ## Download Packages / Code
 
 1. **Clone Our Repo:** `git pull git@github.com:theforager/retrocompetition.git`
