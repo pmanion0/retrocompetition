@@ -128,7 +128,7 @@ class BasicConvolutionNetwork(nn.Module):
     def load_model_s3(self, model_name):
         ''' Load model directly off S3 '''
         self.init_s3_client()
-        response = self.s3_client.put_object(
+        response = self.s3_client.get_object(
             Bucket = 'retro-competition-8bitbandit',
             Key = 'model_outputs/' + model_name)
 
