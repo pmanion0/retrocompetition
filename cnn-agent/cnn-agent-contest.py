@@ -1,4 +1,5 @@
 import sys
+import os
 import torch
 import contest_utils as util
 import torch.optim as optim
@@ -59,6 +60,9 @@ def main():
             env.render()
         if done:
             obs = env.reset()
+
+    out_path = os.path.expanduser('~/test.model')
+    model.save_model(out_path)
 
 
 if __name__ == '__main__':
