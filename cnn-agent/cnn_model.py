@@ -1,4 +1,5 @@
 import torch
+import io
 import numpy as np
 
 from random import random, randint
@@ -16,6 +17,7 @@ class BasicConvolutionNetwork(nn.Module):
         super(BasicConvolutionNetwork, self).__init__()
 
         self.epsilon = epsilon
+        self.s3_client = None
         self.action_count = 12
 
         self.action_index_to_buttom_map = {
@@ -104,3 +106,31 @@ class BasicConvolutionNetwork(nn.Module):
         loaded_dict = torch.load(path)
         self.epsilon = loaded_dict['epsilon']
         self.load_state_dict(loaded_dict['model'])
+
+    def init_s3_client(self):
+        if self.s3_client != None:
+            pass
+        import boto3
+        self.s3_client = boto3.client('s3')
+
+    def save_model_s3(self, model_name):
+        ''' Store model directly onto S3 '''
+        buffer = io.BytesIO()
+        self.save_model(buffer)
+
+        self.init_s3_client()
+        self.s3_client.put_object(
+            Body = buffer,
+            Bucket = 'retro-competition-8bitbandit',
+            Key = 'model_outputs/' + model_name)
+
+
+    def load_model_s3(self, model_name):
+        ''' Load model directly off S3 '''
+        self.init_s3_client()
+        response = self.s3_client.put_object(
+            Bucket = 'retro-competition-8bitbandit',
+            Key = 'model_outputs/' + model_name)
+
+        buffer = io.BytesIO(initial_bytes = response['Body'].read())
+        self.load_model(buffer)
