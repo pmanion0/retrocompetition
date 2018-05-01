@@ -15,6 +15,7 @@ gamma = 0.9
 def main():
     cntr = 0
     is_local = util.parse_local(sys.argv)
+    is_aws = util.parse_aws(sys.argv)
 
     # Initialize the basic training and checkpoint model
     model = BasicConvolutionNetwork()
@@ -56,7 +57,7 @@ def main():
 
         if cntr % 1000:
             checkpoint_model = util.clone_checkpoint_nn(model)
-        if is_local:
+        if is_local and not is_aws:
             env.render()
         if done:
             obs = env.reset()
