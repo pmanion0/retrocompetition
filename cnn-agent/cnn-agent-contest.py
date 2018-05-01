@@ -9,7 +9,7 @@ from torch import nn
 from torch.autograd import Variable
 from cnn_model import BasicConvolutionNetwork
 
-gamma = 0.9
+gamma = 0.96
 
 
 def main():
@@ -30,7 +30,7 @@ def main():
     obs = env.reset()
     screen = util.get_screen_variable(obs)
 
-    while cntr < 10000:
+    while cntr < 100000:
         cntr += 1
 
         # Get the Q value for the current screen
