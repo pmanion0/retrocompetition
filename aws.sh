@@ -115,7 +115,7 @@ EOF
 
     # Clone the Retro Contest repo and install
     git clone --recursive https://github.com/openai/retro-contest.git
-    pip install -e "retro-contest/support[docker,rest]
+    pip install -e "retro-contest/support[docker,rest]"
 EOF
 
   # Install the Sonic the Hedgehog ROM (if available)
