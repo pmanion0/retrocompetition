@@ -2,4 +2,5 @@
 .DS_Store
 results/
 ansible/remote_files/known_hosts
+ansible/remote_files/aws_credentials
 ansible/remote_files/SonicTheHedgehog-Genesis/rom.md
