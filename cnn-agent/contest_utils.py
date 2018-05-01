@@ -11,7 +11,7 @@ def parse_local(args):
 
 def parse_aws(args):
     """ Return whether the job is running on AWS (to skip rendering) """
-    if len(args) > 1 and args[1] == "aws"):
+    if len(args) > 1 and args[1] == "aws":
         return True
     else:
         return False

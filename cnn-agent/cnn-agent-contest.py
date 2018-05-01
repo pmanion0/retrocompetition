@@ -55,6 +55,8 @@ def main():
         optimizer.step()
         #model.backward(Q_observed - Q_estimated)
 
+        print("{o}: {l}".format(o=cntr, l=loss))
+
         if cntr % 1000:
             checkpoint_model = util.clone_checkpoint_nn(model)
         if is_local and not is_aws:
