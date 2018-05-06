@@ -55,11 +55,11 @@ def main():
         Q_future = forecast_model.forward(next_screen)
 
         # Calculate the loss
-        loss = config.get_loss(Q_estimated, rew, Q_future)
+        loss = config.calculate_loss(Q_estimated, rew, Q_future)
 
         # Run the gradients
         config.optimizer.zero_grad()
-        config.loss.backward()
+        loss.backward()
         config.optimizer.step()
 
         print("{o}: {l}".format(o=cntr, l=loss))

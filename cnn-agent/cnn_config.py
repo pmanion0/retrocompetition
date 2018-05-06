@@ -9,7 +9,7 @@ class CNNConfig:
     def calculate_loss(self, Q_estimated, actual_reward, future_reward):
         Q_observed = actual_reward + self.gamma * future_reward
         Q_observed = Variable(Q_observed.data)
-        return self.loss(Q_estimated, Q_observed))
+        return self.loss_func(Q_estimated, Q_observed)
 
-    def init_optimizer(params):
+    def init_optimizer(self, params):
         self.optimizer = self.opt_func(params)
