@@ -2,12 +2,13 @@ import torch
 import io
 import numpy as np
 
+from retro_s3 import RetroS3Client
 from random import random, randint
 from torch import nn
 
 class BasicConvolutionNetwork(nn.Module):
 
-    def __init__(self, epsilon=0.05):
+    def __init__(self, epsilon = 0.05):
         ''' Screen (D,H,W): 3x224x320
             Buttons: [B, A, MODE, START, UP, DOWN, LEFT, RIGHT, C, Y, X, Z]
             Actions: [UP, DOWN, LEFT, RIGHT, (UP,LEFT), (UP,RIGHT), (DOWN,LEFT),
@@ -17,7 +18,8 @@ class BasicConvolutionNetwork(nn.Module):
         super(BasicConvolutionNetwork, self).__init__()
 
         self.epsilon = epsilon
-        self.s3_client = None
+        self.s3_client = RetroS3Client()
+
         self.action_count = 12
 
         self.action_index_to_buttom_map = {
@@ -96,41 +98,27 @@ class BasicConvolutionNetwork(nn.Module):
             if value == 1
         ])
 
-    def save_model(self, path):
+    def save_model(self, path_or_buffer):
+        ''' Save model to a local file path or buffer '''
         torch.save({
             'model': self.state_dict(),
             'epsilon': self.epsilon
-        }, path)
+        }, path_or_buffer)
 
-    def load_model(self, path):
-        loaded_dict = torch.load(path)
+    def load_model(self, path_or_buffer):
+        ''' Load model from a local file path or buffer '''
+        loaded_dict = torch.load(path_or_buffer)
         self.epsilon = loaded_dict['epsilon']
         self.load_state_dict(loaded_dict['model'])
-
-    def init_s3_client(self):
-        if self.s3_client != None:
-            pass
-        import boto3
-        self.s3_client = boto3.client('s3')
 
     def save_model_s3(self, model_name):
         ''' Store model directly onto S3 '''
         buffer = io.BytesIO()
         self.save_model(buffer)
-
-        self.init_s3_client()
-        self.s3_client.put_object(
-            Body = buffer,
-            Bucket = 'retro-competition-8bitbandit',
-            Key = 'model_outputs/' + model_name)
+        self.s3_client.save_from_buffer(buffer, model_name)
 
 
     def load_model_s3(self, model_name):
         ''' Load model directly off S3 '''
-        self.init_s3_client()
-        response = self.s3_client.get_object(
-            Bucket = 'retro-competition-8bitbandit',
-            Key = 'model_outputs/' + model_name)
-
-        buffer = io.BytesIO(initial_bytes = response['Body'].read())
+        buffer = self.s3_client.load_to_buffer(model_name)
         self.load_model(buffer)
