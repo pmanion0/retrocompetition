@@ -1,5 +1,7 @@
 FROM openai/retro-agent:pytorch
-ADD cnn-agent-contest.py .
+ADD cnn_main.py .
 ADD cnn_model.py .
-ADD contest_utils.py .
-CMD ["python", "-u", "/root/compo/cnn-agent-contest.py"]
+ADD cnn_config.py .
+ADD retro_utils.py .
+ADD retro_s3.py .
+CMD ["python", "-u", "/root/compo/cnn_main.py"]

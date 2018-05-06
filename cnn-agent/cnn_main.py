@@ -1,7 +1,7 @@
 import sys
 import os
 import torch
-import contest_utils as util
+import retro_utils as util
 import torch.optim as optim
 import torch.nn.functional as F
 
