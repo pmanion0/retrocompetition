@@ -8,7 +8,7 @@ class RetroEvaluator:
         self.log_folder = log_folder
         pass
 
-    def summarize_step(self, action, next_screen, rew, loss):
+    def summarize_step(self, Q_estimated, action, reward, loss, Q_future, next_screen):
         ''' Provides evaluator the summary of the last step '''
         print("{o}: {l}".format(o=self.counter, l=loss))
         self.counter += 1

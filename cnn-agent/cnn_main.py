@@ -64,7 +64,7 @@ def main():
         if done:
             obs = env.reset()
 
-        evaluator.summarize_step(action, next_screen, rew, loss)
+        evaluator.summarize_step(Q_estimated, action, rew, loss, Q_future, next_screen)
         current_screen = next_screen
 
     out_path = os.path.expanduser('~/test.model')
