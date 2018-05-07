@@ -10,23 +10,20 @@ from torch.autograd import Variable
 
 from cnn_model import BasicConvolutionNetwork
 from cnn_config import CNNConfig
-
-
+from cnn_evaluator import RetroEvaluator
 
 def main():
-    cntr = 0
     is_local = util.parse_local(sys.argv)
     is_aws = util.parse_aws(sys.argv)
 
     # Initialize and load the model to train
-    model = BasicConvolutionNetwork()
-    model.load_model('../../test.model')
-
-    # Setup the config with other training parameters
-    config = CNNConfig(gamma = 0.96,
+    model = BasicConvolutionNetwork(epsilon = 0.10)
+    evaluator = RetroEvaluator(log_folder = None)
+    config = CNNConfig(gamma = 0.99,
         loss_func = F.smooth_l1_loss,
         opt_func = optim.RMSprop)
 
+    model.load_model('../../test.model')
     config.init_optimizer(model.parameters())
 
     # Create forecast model for future rewards
@@ -39,9 +36,7 @@ def main():
     obs = env.reset()
     current_screen = util.get_screen_variable(obs)
 
-    while cntr < 100000:
-        cntr += 1
-
+    while evaluator.get_count() < 100000:
         # Get the Q value for the current screen
         Q_estimated = model.forward(current_screen)
 
@@ -62,15 +57,14 @@ def main():
         loss.backward()
         config.optimizer.step()
 
-        print("{o}: {l}".format(o=cntr, l=loss))
-
-        if cntr % 1000:
+        if evaluator.get_count() % 1000 == 0:
             forecast_model = util.clone_checkpoint_nn(model)
         if is_local and not is_aws:
             env.render()
         if done:
             obs = env.reset()
 
+        evaluator.summarize_step(action, next_screen, rew, loss)
         current_screen = next_screen
 
     out_path = os.path.expanduser('~/test.model')
