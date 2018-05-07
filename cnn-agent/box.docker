@@ -2,6 +2,7 @@ FROM openai/retro-agent:pytorch
 ADD cnn_main.py .
 ADD cnn_model.py .
 ADD cnn_config.py .
+ADD cnn_evaluator.py .
 ADD retro_utils.py .
 ADD retro_s3.py .
 CMD ["python", "-u", "/root/compo/cnn_main.py"]
