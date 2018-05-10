@@ -23,7 +23,7 @@ def main():
         loss_func = F.smooth_l1_loss,
         opt_func = optim.RMSprop)
 
-    model.load_model('../../test.model')
+    #model.load_model('../../test.model')
     config.init_optimizer(model.parameters())
 
     # Create forecast model for future rewards
@@ -40,11 +40,11 @@ def main():
         # Get the Q value for the current screen
         Q_estimated = model.forward(current_screen)
 
-        # Determine the optimal action to pursue
-        action = model.get_action(Q_estimated)
+        # Determine the optimal buttons to press
+        buttons = model.get_buttons(Q_estimated)
 
-        # Apply the action and observe the results
-        obs, rew, done, info = env.step(action)
+        # Apply the button presses and observe the results
+        obs, rew, done, info = env.step(buttons)
         next_screen = util.get_screen_variable(obs)
 
         Q_future = forecast_model.forward(next_screen)
@@ -64,7 +64,7 @@ def main():
         if done:
             obs = env.reset()
 
-        evaluator.summarize_step(Q_estimated, action, rew, loss, Q_future, next_screen)
+        evaluator.summarize_step(Q_estimated, buttons, rew, loss, Q_future, next_screen)
         current_screen = next_screen
 
     out_path = os.path.expanduser('~/test.model')

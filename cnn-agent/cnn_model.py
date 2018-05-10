@@ -20,22 +20,27 @@ class BasicConvolutionNetwork(nn.Module):
         self.epsilon = epsilon
         self.s3_client = RetroS3Client()
 
-        self.action_count = 12
-
-        self.action_index_to_buttom_map = {
-            0: ["UP"],
-            1: ["DOWN"],
-            2: ["LEFT"],
-            3: ["RIGHT"],
-            4: ["UP","LEFT"],
-            5: ["UP","RIGHT"],
-            6: ["DOWN","LEFT"],
-            7: ["DOWN","RIGHT"],
-        }
-
+        # Number of possible buttons (can be 0 for off, 1 for on)
         self.button_index_list = ["B", "A", "MODE", "START", "UP", "DOWN",
             "LEFT", "RIGHT", "C", "Y", "X", "Z"]
 
+        self.button_count = len(self.button_index_list)
+
+        # Number of unique actions to decide between (combination of buttons)
+        self.action_index_to_buttom_map = {
+            0: ["UP"],             1: ["A","UP"],
+            2: ["DOWN"],           3: ["A","DOWN"],
+            4: ["LEFT"],           5: ["A","LEFT"],
+            6: ["RIGHT"],          7: ["A","RIGHT"],
+            8: ["UP","LEFT"],      9: ["A","UP","LEFT"],
+            10: ["UP","RIGHT"],   11: ["A","UP","RIGHT"],
+            12: ["DOWN","LEFT"],  13: ["A","DOWN","LEFT"],
+            14: ["DOWN","RIGHT"], 15: ["A","DOWN","RIGHT"]
+        }
+
+        self.action_count = len(self.action_index_to_buttom_map)
+
+        # Define neural network architecture
         self.conv_layer = nn.Sequential(
             nn.Conv2d(3, 10, 7, padding=3),
             nn.ReLU(),
@@ -59,42 +64,42 @@ class BasicConvolutionNetwork(nn.Module):
         out = self.fc_layer(out)
         return out
 
-    def get_action(self, q_values):
+    def get_buttons(self, q_values):
         """ Return an epsilon-greedy optimal policy given the Q values """
         if random() < self.epsilon:
             action = self.get_random_action()
         else:
             action = self.get_best_q_action(q_values)
-        return action
+
+        button_array = self.convert_action_to_buttons(action)
+        return button_array
+
+    def convert_action_to_buttons(self, action):
+        ''' Convert list of actions to press (as strings) into an array with
+            each button to press to pass into simulation, e.g.
+            ["UP","B"] -> [1,0,0,0,1,0,0,0,0,0,0,0] '''
+        button_array = np.array([0] * self.button_count)
+        for a in action:
+            button_array[self.button_index_list.index(a)] = 1
+        return button_array
 
     def get_random_action(self):
         """ Return an action array with a single random action """
-        action = np.array([0] * self.action_count)
-        random_index = randint(0, self.action_count-1)
-        action[random_index] = 1
-        return action
+        random_action_index = randint(0, self.action_count-1)
+        random_action = self.action_index_to_buttom_map[random_action_index]
+        return random_action
 
     def get_best_q_action(self, q_values):
         """ Return an action array with the high Q-value action chosen """
-        output = np.array([0] * self.action_count)
+        best_action_index = int(q_values.max(1)[1])
+        best_action = self.action_index_to_buttom_map[best_action_index]
+        return best_action
 
-        action_index = int(q_values.max(1)[1])
-        buttons = []
-        if action_index > 7:
-            buttons += ["A"]
-            action_index -= 7
-        buttons += self.action_index_to_buttom_map[action_index]
-
-        for b in buttons:
-            output[self.button_index_list.index(b)] = 1
-
-        return output
-
-    def action_array_to_string(self, action_array):
-        ''' TODO: '''
+    def buttons_to_action(self, button_array):
+        ''' Convert array of button presses into an action list '''
         return ' + '.join([
             self.button_index_list[index]
-            for index, value in enumerate(action_array)
+            for index, value in enumerate(button_array)
             if value == 1
         ])
 
@@ -116,7 +121,6 @@ class BasicConvolutionNetwork(nn.Module):
         buffer = io.BytesIO()
         self.save_model(buffer)
         self.s3_client.save_from_buffer(buffer, model_name)
-
 
     def load_model_s3(self, model_name):
         ''' Load model directly off S3 '''
