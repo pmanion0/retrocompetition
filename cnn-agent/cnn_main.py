@@ -18,7 +18,7 @@ def main():
 
     # Initialize and load the model to train
     model = BasicConvolutionNetwork(epsilon = 0.10)
-    evaluator = RetroEvaluator(log_folder = None)
+    evaluator = RetroEvaluator(log_folder = '/Users/southbranchgov/')
     config = CNNConfig(gamma = 0.99,
         loss_func = F.smooth_l1_loss,
         opt_func = optim.RMSprop)
@@ -66,6 +66,8 @@ def main():
 
         evaluator.summarize_step(Q_estimated, buttons, rew, loss, Q_future, next_screen)
         current_screen = next_screen
+
+        #evaluator.create_image()
 
     out_path = os.path.expanduser('~/test.model')
     model.save_model(out_path)
