@@ -33,7 +33,7 @@ parser.add_argument('-c', '--max_step_count', default=100000, type=int,
                     help='maximum number of steps to train before terminating')
 parser.add_argument('-o', '--output_model_file', default=None,
                     help='file to store the trained model outputs')
-parser.add_argument('-t' '--tracking', action='store_true',
+parser.add_argument('-t', '--tracking', action='store_true',
                     help='turn on tracking outputs')
 
 args = parser.parse_args()
