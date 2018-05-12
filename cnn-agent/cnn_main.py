@@ -27,10 +27,14 @@ parser.add_argument('-g', '--gamma', default=0.99, type=float,
                     help='discount rate of rewards in future time steps')
 parser.add_argument('-m', '--load_model_file', default=None,
                     help='file to load initial model parameters from')
+parser.add_argument('-r', '--right_bias', default=0,
+                    help='amount to increase initial bias term on running right')
 parser.add_argument('-c', '--max_step_count', default=100000, type=int,
                     help='maximum number of steps to train before terminating')
 parser.add_argument('-o', '--output_model_file', default=None,
                     help='file to store the trained model outputs')
+parser.add_argument('-t' '--tracking', action='store_true',
+                    help='turn on tracking outputs')
 
 args = parser.parse_args()
 
@@ -39,7 +43,8 @@ def main():
     is_aws = util.parse_aws(sys.argv)
 
     # Initialize and load the model to train
-    model = BasicConvolutionNetwork(epsilon = args.epsilon)
+    model = BasicConvolutionNetwork(epsilon = args.epsilon,
+        right_bias = args.right_bias)
     evaluator = RetroEvaluator(log_folder = args.log_folder)
     config = CNNConfig(gamma = args.gamma,
         loss_func = F.smooth_l1_loss,
@@ -90,7 +95,9 @@ def main():
         evaluator.summarize_step(Q_estimated, buttons, rew, loss, Q_future, next_screen)
         current_screen = next_screen
 
-        #evaluator.create_image()
+        # Output useful diagnostic figures during training (SLOW!)
+        if args.tracking:
+            evaluator.output_tracking_image()
 
     if args.output_model_file != None:
         out_path = os.path.expanduser(args.output_model_file)
