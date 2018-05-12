@@ -1,5 +1,6 @@
 import sys
 import os
+import argparse
 import torch
 import retro_utils as util
 import torch.optim as optim
@@ -12,18 +13,40 @@ from cnn_model import BasicConvolutionNetwork
 from cnn_config import CNNConfig
 from cnn_evaluator import RetroEvaluator
 
+#'../../test.model'
+#'~/test.model'
+
+parser = argparse.ArgumentParser(description="")
+parser.add_argument('-e', '--epsilon', default=0.10, type=float,
+                    help='probability of taking a random action at each step')
+parser.add_argument('-l', '--local', action='store_true',
+                    help='indicator to initialize local environment with video')
+parser.add_argument('-f', '--log_folder', default='',
+                    help='folder used to store all non-model outputs')
+parser.add_argument('-g', '--gamma', default=0.99, type=float,
+                    help='discount rate of rewards in future time steps')
+parser.add_argument('-m', '--load_model_file', default=None,
+                    help='file to load initial model parameters from')
+parser.add_argument('-c', '--max_step_count', default=100000, type=int,
+                    help='maximum number of steps to train before terminating')
+parser.add_argument('-o', '--output_model_file', default=None,
+                    help='file to store the trained model outputs')
+
+args = parser.parse_args()
+
 def main():
-    is_local = util.parse_local(sys.argv)
+    is_local = args.local
     is_aws = util.parse_aws(sys.argv)
 
     # Initialize and load the model to train
-    model = BasicConvolutionNetwork(epsilon = 0.10)
-    evaluator = RetroEvaluator(log_folder = '/Users/southbranchgov/')
-    config = CNNConfig(gamma = 0.99,
+    model = BasicConvolutionNetwork(epsilon = args.epsilon)
+    evaluator = RetroEvaluator(log_folder = args.log_folder)
+    config = CNNConfig(gamma = args.gamma,
         loss_func = F.smooth_l1_loss,
         opt_func = optim.RMSprop)
 
-    #model.load_model('../../test.model')
+    if args.load_model_file != None:
+        model.load_model(args.load_model_file)
     config.init_optimizer(model.parameters())
 
     # Create forecast model for future rewards
@@ -36,7 +59,7 @@ def main():
     obs = env.reset()
     current_screen = util.get_screen_variable(obs)
 
-    while evaluator.get_count() < 100000:
+    while evaluator.get_count() < args.max_step_count:
         # Get the Q value for the current screen
         Q_estimated = model.forward(current_screen)
 
@@ -69,8 +92,9 @@ def main():
 
         #evaluator.create_image()
 
-    out_path = os.path.expanduser('~/test.model')
-    model.save_model(out_path)
+    if args.output_model_file != None:
+        out_path = os.path.expanduser(args.output_model_file)
+        model.save_model(out_path)
 
 
 if __name__ == '__main__':
