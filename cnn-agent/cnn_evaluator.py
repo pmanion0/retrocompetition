@@ -28,7 +28,8 @@ class RetroEvaluator:
         return self.counter
 
     def get_memory_index(self, counter_index):
-        ''' '''
+        ''' Convert the time-step counter index into an index for pulling
+            information out of the memory queue '''
         memory_index = self.counter - counter_index
 
         if memory_index < 0:
@@ -40,7 +41,7 @@ class RetroEvaluator:
             return memory_index
 
     def create_video(self, counter_index, pre_frames=3, post_frames=0, output_file = 'output.gif'):
-        ''' Create a GIF '''
+        ''' Create a GIF of frames around the desire timestep counter index '''
         try:
             start = counter_index - pre_frames
             end = counter_index + post_frames
@@ -87,26 +88,26 @@ class RetroEvaluator:
         if filename == None:
             filename = 'img_{}.png'.format(counter_index)
 
-        fig = self.draw_screen_q_figure_by_index(counter_index)
+        fig = self.draw_diagnostic_figure_by_index(counter_index)
 
         fig.savefig(self.log_folder + filename)
         plt.close(fig)
 
-    def draw_screen_q_figure_by_index(self, counter_index):
-        ''' Draw '''
+    def draw_diagnostic_figure_by_index(self, counter_index):
+        ''' Draw the diagnostic figure using a timestep counter index '''
         mem_index = self.get_memory_index(counter_index)
 
         m = self.memory[mem_index]
         screen_array = self.format_image_tensor(m['screen'])
         q_array = self.format_q_tensor(m['Q_estimate'])
 
-        fig = self.draw_screen_q_figure(screen_array, q_array)
+        fig = self.draw_diagnostic_figure(screen_array, q_array)
 
         return fig
 
 
-    def draw_screen_q_figure(self, screen_array, q_array):
-        ''' Draw screen and Q-estimates on a single image to output to filename '''
+    def draw_diagnostic_figure(self, screen_array, q_array):
+        ''' Draw the actual diagnostic figure using the raw inputs '''
         col_labels = ['◄','','►']
         row_labels = ['▲','', '▼']*2
 
