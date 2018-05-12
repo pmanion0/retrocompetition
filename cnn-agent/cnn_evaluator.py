@@ -1,8 +1,10 @@
 import imageio
+import io
 import numpy as np
 
 from matplotlib import pyplot as plt
 from collections import deque
+from tempfile import TemporaryDirectory
 
 class RetroEvaluator:
 
@@ -25,12 +27,41 @@ class RetroEvaluator:
         ''' Returns the step count '''
         return self.counter
 
+    def get_memory_index(self, counter_index):
+        ''' '''
+        memory_index = self.counter - counter_index
 
-    def create_video(self, counter_index, pre_frames=3, post_frames=0):
+        if memory_index < 0:
+            raise ValueError('Desired index is in the future!')
+        elif memory_index > len(self.memory):
+            raise ValueError('Desired index is too far in the past ' +
+                '(outside memory size)!')
+        else:
+            return memory_index
+
+    def create_video(self, counter_index, pre_frames=3, post_frames=0, output_file = 'output.gif'):
         ''' Create a GIF '''
-        if counter_index + post_frames > self.counter:
-            pass # Have not observed sufficient post-frames
-        pass
+        try:
+            start = counter_index - pre_frames
+            end = counter_index + post_frames
+
+            fig_array_list = []
+            for m in range(start, end):
+                fig = self.draw_screen_q_figure_by_index(counter_index = m)
+
+                buf = io.BytesIO()
+                fig.savefig(buf, format='png')
+                plt.close(fig)
+                buf.seek(0)
+                f_array = imageio.imread(buf, format='png')
+
+                fig_array_list.append(f_array)
+
+            imageio.mimsave(self.log_folder + output_file, fig_array_list,
+                format='GIF',duration = 0.5)
+
+        except ValueError:
+            print("Unable to process video")
 
     def format_image_tensor(self, image_tensor):
         ''' Convert PyTorch Tensor into a NumPy image for ImageIO '''
@@ -56,18 +87,25 @@ class RetroEvaluator:
         if filename == None:
             filename = 'img_{}.png'.format(counter_index)
 
-        mem_index = self.counter - counter_index
+        fig = self.draw_screen_q_figure_by_index(counter_index)
+
+        fig.savefig(self.log_folder + filename)
+        plt.close(fig)
+
+    def draw_screen_q_figure_by_index(self, counter_index):
+        ''' Draw '''
+        mem_index = self.get_memory_index(counter_index)
 
         m = self.memory[mem_index]
         screen_array = self.format_image_tensor(m['screen'])
         q_array = self.format_q_tensor(m['Q_estimate'])
 
-        fig = self.draw_screen_q_figure(screen_array, q_array, filename)
+        fig = self.draw_screen_q_figure(screen_array, q_array)
 
-        fig.savefig(self.log_folder + filename)
-        plt.close(fig)
+        return fig
 
-    def draw_screen_q_figure(self, screen_array, q_array, filename):
+
+    def draw_screen_q_figure(self, screen_array, q_array):
         ''' Draw screen and Q-estimates on a single image to output to filename '''
         col_labels = ['◄','','►']
         row_labels = ['▲','', '▼']*2
@@ -76,7 +114,7 @@ class RetroEvaluator:
             gridspec_kw = {'width_ratios':[3, 1]})
         sonic_img, q_img = ax
 
-        sonic_img.imshow(screen_array)
+        sonic_img.imshow(screen_array, cmap='jet')
         sonic_img.set_axis_off()
 
         q_img.imshow(q_array)
