@@ -99,8 +99,8 @@ class BasicConvolutionNetwork(nn.Module):
         best_action = self.action_index_to_buttom_map[best_action_index]
         return best_action
 
-    def buttons_to_action(self, button_array):
-        ''' Convert array of button presses into an action list '''
+    def buttons_to_string(self, button_array):
+        ''' Convert array of button presses into an interpretable string '''
         return ' + '.join([
             self.button_index_list[index]
             for index, value in enumerate(button_array)
