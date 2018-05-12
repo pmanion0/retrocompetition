@@ -28,17 +28,6 @@ class BasicConvolutionNetwork(nn.Module):
 
         # Number of unique actions to decide between (combination of buttons)
         self.action_index_to_buttom_map = {
-            0: ["UP"],             1: ["A","UP"],
-            2: ["DOWN"],           3: ["A","DOWN"],
-            4: ["LEFT"],           5: ["A","LEFT"],
-            6: ["RIGHT"],          7: ["A","RIGHT"],
-            8: ["UP","LEFT"],      9: ["A","UP","LEFT"],
-            10: ["UP","RIGHT"],   11: ["A","UP","RIGHT"],
-            12: ["DOWN","LEFT"],  13: ["A","DOWN","LEFT"],
-            14: ["DOWN","RIGHT"], 15: ["A","DOWN","RIGHT"]
-        }
-
-        self.action_index_to_buttom_map = {
             0:  ["UP","LEFT"],     1: ["A","UP","LEFT"],
             2:  ["UP"],            3: ["A","UP"],
             4:  ["UP","RIGHT"],    5: ["A","UP","RIGHT"],
