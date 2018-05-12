@@ -9,7 +9,7 @@ class RetroEvaluator:
     def __init__(self, log_folder, queue_memory = 100):
         self.counter = 0
         self.log_folder = log_folder
-        self.memory = deque([None]*queue_memory, queue_memory)
+        self.memory = deque([], queue_memory)
 
     def summarize_step(self, Q_estimate, action, reward, loss, Q_future, next_screen):
         ''' Provides evaluator the summary of the last step '''
@@ -32,8 +32,25 @@ class RetroEvaluator:
             pass # Have not observed sufficient post-frames
         pass
 
-    def create_image(self, counter_index = None, filename = None):
-        ''' '''
+    def format_image_tensor(self, image_tensor):
+        ''' Convert PyTorch Tensor into a NumPy image for ImageIO '''
+        numpy_image = image_tensor.squeeze(0).permute(1,2,0).numpy()
+        return numpy_image.astype('uint8')
+
+    def format_q_tensor(self, q_tensor):
+        ''' Convert Q-estimate tensor into a NumpyArray, arranged for plotting,
+            that has movement without A (jump) on top and movement with A on
+            bottom '''
+        q_array = q_tensor.detach().numpy()[0,:]
+
+        out_no_A = q_array[::2].reshape(3,3)
+        out_with_a = q_array[1::2].reshape(3,3)
+
+        out_stacked = np.concatenate([out_no_A, out_with_a], axis=0)
+        return out_stacked
+
+    def output_tracking_image(self, counter_index = None, filename = None):
+        ''' Output the tracking image for the given index to a file or screen '''
         if counter_index == None:
             counter_index = self.counter
         if filename == None:
@@ -45,21 +62,13 @@ class RetroEvaluator:
         screen_array = self.format_image_tensor(m['screen'])
         q_array = self.format_q_tensor(m['Q_estimate'])
 
-        self.plot_screen_q(screen_array, q_array, filename)
+        fig = self.draw_screen_q_figure(screen_array, q_array, filename)
 
-    def format_image_tensor(self, image_tensor):
-        ''' Convert PyTorch Tensor into a NumPy image for ImageIO '''
-        numpy_image = image_tensor.squeeze(0).permute(1,2,0).numpy()
-        return numpy_image.astype('uint8')
+        fig.savefig(self.log_folder + filename)
+        plt.close(fig)
 
-    def format_q_tensor(self, q_tensor):
-        q_array = q_tensor.detach().numpy()[0,:]
-        out_no_A = q_array[::2].reshape(3,3)
-        out_with_a = q_array[1::2].reshape(3,3)
-        out_stacked = np.concatenate([out_no_A, out_with_a], axis=0)
-        return out_stacked
-
-    def plot_screen_q(self, screen_array, q_array, filename):
+    def draw_screen_q_figure(self, screen_array, q_array, filename):
+        ''' Draw screen and Q-estimates on a single image to output to filename '''
         col_labels = ['◄','','►']
         row_labels = ['▲','', '▼']*2
 
@@ -89,5 +98,4 @@ class RetroEvaluator:
                     ha="center", va="center", color="w", fontsize=6)
 
         fig.tight_layout(pad=0)
-        fig.savefig(self.log_folder + filename)
-        plt.close(fig)
+        return fig
