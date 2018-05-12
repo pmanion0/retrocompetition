@@ -8,7 +8,7 @@ from torch import nn
 
 class BasicConvolutionNetwork(nn.Module):
 
-    def __init__(self, epsilon = 0.05, right_bias = 100000):
+    def __init__(self, epsilon = 0.05, right_bias = 0):
         ''' Screen (D,H,W): 3x224x320
             Buttons: [B, A, MODE, START, UP, DOWN, LEFT, RIGHT, C, Y, X, Z]
             Actions: [UP, DOWN, LEFT, RIGHT, (UP,LEFT), (UP,RIGHT), (DOWN,LEFT),
