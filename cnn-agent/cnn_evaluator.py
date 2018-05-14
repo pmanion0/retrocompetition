@@ -21,7 +21,7 @@ class RetroEvaluator:
         self.memory.appendleft(memory)
         self.counter += 1
 
-        print("{o}: {l}".format(o=self.counter, l=loss))
+        print("{o}: {l}".format(o=self.counter, l=loss[0,action]))
 
     def get_count(self):
         ''' Returns the step count '''
@@ -48,7 +48,7 @@ class RetroEvaluator:
 
             fig_array_list = []
             for m in range(start, end):
-                fig = self.draw_screen_q_figure_by_index(counter_index = m)
+                fig = self.draw_diagnostic_figure_by_index(counter_index = m)
 
                 buf = io.BytesIO()
                 fig.savefig(buf, format='png')
@@ -59,8 +59,7 @@ class RetroEvaluator:
                 fig_array_list.append(f_array)
 
             imageio.mimsave(self.log_folder + output_file, fig_array_list,
-                format='GIF',duration = 0.5)
-
+                format='GIF',duration = 0.1)
         except ValueError:
             print("Unable to process video")
 
