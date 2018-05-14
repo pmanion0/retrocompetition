@@ -27,7 +27,7 @@ class BasicConvolutionNetwork(nn.Module):
         self.button_count = len(self.button_index_list)
 
         # Number of unique actions to decide between (combination of buttons)
-        self.action_index_to_buttom_map = {
+        self.action_index_to_string_map = {
             0:  ["UP","LEFT"],     1: ["A","UP","LEFT"],
             2:  ["UP"],            3: ["A","UP"],
             4:  ["UP","RIGHT"],    5: ["A","UP","RIGHT"],
@@ -39,7 +39,7 @@ class BasicConvolutionNetwork(nn.Module):
             16: ["DOWN","RIGHT"], 17: ["A","DOWN","RIGHT"]
         }
 
-        self.action_count = len(self.action_index_to_buttom_map)
+        self.action_count = len(self.action_index_to_string_map)
 
         # Define neural network architecture
         self.conv_layer = nn.Sequential(
@@ -69,12 +69,8 @@ class BasicConvolutionNetwork(nn.Module):
         return out
 
     def get_buttons(self, q_values):
-        """ Return an epsilon-greedy optimal policy given the Q values """
-        if random() < self.epsilon:
-            action = self.get_random_action()
-        else:
-            action = self.get_best_q_action(q_values)
-
+        ''' Return an epsilon-greedy optimal policy given the Q values '''
+        action = self.get_action(q_values)
         button_array = self.convert_action_to_buttons(action)
         return button_array
 
@@ -83,21 +79,28 @@ class BasicConvolutionNetwork(nn.Module):
             each button to press to pass into simulation, e.g.
             ["UP","B"] -> [1,0,0,0,1,0,0,0,0,0,0,0] '''
         button_array = np.array([0] * self.button_count)
-        for a in action:
+        action_str = self.action_index_to_string_map[action]
+        for a in action_str:
             button_array[self.button_index_list.index(a)] = 1
         return button_array
 
+    def get_action(self, q_values):
+        ''' Return an epsilon-greedy optimal policy given the Q values '''
+        if random() < self.epsilon:
+            action = self.get_random_action()
+        else:
+            action = self.get_best_q_action(q_values)
+        return action
+
     def get_random_action(self):
-        """ Return an action array with a single random action """
+        ''' Return an action array with a single random action '''
         random_action_index = randint(0, self.action_count-1)
-        random_action = self.action_index_to_buttom_map[random_action_index]
-        return random_action
+        return random_action_index
 
     def get_best_q_action(self, q_values):
-        """ Return an action array with the high Q-value action chosen """
+        ''' Return an action array with the high Q-value action chosen '''
         best_action_index = int(q_values.max(1)[1])
-        best_action = self.action_index_to_buttom_map[best_action_index]
-        return best_action
+        return best_action_index
 
     def buttons_to_string(self, button_array):
         ''' Convert array of button presses into an interpretable string '''

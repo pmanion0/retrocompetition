@@ -27,7 +27,7 @@ parser.add_argument('-g', '--gamma', default=0.99, type=float,
                     help='discount rate of rewards in future time steps')
 parser.add_argument('-m', '--load_model_file', default=None,
                     help='file to load initial model parameters from')
-parser.add_argument('-r', '--right_bias', default=0,
+parser.add_argument('-r', '--right_bias', default=0, type=float,
                     help='amount to increase initial bias term on running right')
 parser.add_argument('-c', '--max_step_count', default=100000, type=int,
                     help='maximum number of steps to train before terminating')
@@ -69,20 +69,23 @@ def main():
         Q_estimated = model.forward(current_screen)
 
         # Determine the optimal buttons to press
-        buttons = model.get_buttons(Q_estimated)
+        action = model.get_action(Q_estimated)
+        buttons = model.convert_action_to_buttons(action)
 
         # Apply the button presses and observe the results
-        obs, rew, done, info = env.step(buttons)
+        obs, reward, done, info = env.step(buttons)
         next_screen = util.get_screen_variable(obs)
 
         Q_future = forecast_model.forward(next_screen)
 
         # Calculate the loss
-        loss = config.calculate_loss(Q_estimated, rew, Q_future)
+        loss = config.calculate_loss(Q_estimated, reward, Q_future)
+        action_mask = torch.zeros_like(loss)
+        action_mask[0, action] = 1
 
-        # Run the gradients
+        # Run the gradient (only for chosen action -- zero all other gradients)
         config.optimizer.zero_grad()
-        loss.backward()
+        loss.backward(action_mask)
         config.optimizer.step()
 
         if evaluator.get_count() % 1000 == 0:

@@ -6,10 +6,11 @@ class CNNConfig:
         self.loss_func = loss_func
         self.opt_func = opt_func
 
-    def calculate_loss(self, Q_estimated, actual_reward, future_reward):
-        Q_observed = actual_reward + self.gamma * future_reward
+    def calculate_loss(self, Q_estimated, actual_reward, Q_future):
+        ''' Calculate the loss to return to the network '''
+        Q_observed = actual_reward + self.gamma * Q_future
         Q_observed = Variable(Q_observed.data)
-        return self.loss_func(Q_estimated, Q_observed)
+        return self.loss_func(Q_estimated, Q_observed, reduce=False)
 
     def init_optimizer(self, params):
         self.optimizer = self.opt_func(params)
