@@ -95,7 +95,7 @@ def main():
         if done:
             obs = env.reset()
 
-        evaluator.summarize_step(Q_estimated, buttons, rew, loss, Q_future, next_screen)
+        evaluator.summarize_step(Q_estimated, action, reward, loss, Q_future, next_screen)
         current_screen = next_screen
 
         # Output useful diagnostic figures during training (SLOW!)
