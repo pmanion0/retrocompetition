@@ -48,7 +48,7 @@ def main():
     evaluator = RetroEvaluator(log_folder = args.log_folder)
     config = CNNConfig(gamma = args.gamma,
         loss_func = F.smooth_l1_loss,
-        opt_func = optim.RMSprop)
+        opt_func = optim.SGD)
 
     if args.load_model_file != None:
         model.load_model(args.load_model_file)

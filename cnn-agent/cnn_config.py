@@ -13,4 +13,4 @@ class CNNConfig:
         return self.loss_func(Q_estimated, Q_observed, reduce=False)
 
     def init_optimizer(self, params):
-        self.optimizer = self.opt_func(params)
+        self.optimizer = self.opt_func(params, lr = 1e-8, momentum=0.9)
