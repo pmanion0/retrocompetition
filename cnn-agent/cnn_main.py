@@ -12,30 +12,9 @@ from torch.autograd import Variable
 from cnn_model import BasicConvolutionNetwork
 from cnn_config import CNNConfig
 from cnn_evaluator import RetroEvaluator
+from cnn_argparser import CNNArgumentParser
 
-#'../../test.model'
-#'~/test.model'
-
-parser = argparse.ArgumentParser(description="")
-parser.add_argument('-e', '--epsilon', default=0.10, type=float,
-                    help='probability of taking a random action at each step')
-parser.add_argument('-l', '--local', action='store_true',
-                    help='indicator to initialize local environment with video')
-parser.add_argument('-f', '--log_folder', default='',
-                    help='folder used to store all non-model outputs')
-parser.add_argument('-g', '--gamma', default=0.99, type=float,
-                    help='discount rate of rewards in future time steps')
-parser.add_argument('-m', '--load_model_file', default=None,
-                    help='file to load initial model parameters from')
-parser.add_argument('-r', '--right_bias', default=0, type=float,
-                    help='amount to increase initial bias term on running right')
-parser.add_argument('-c', '--max_step_count', default=100000, type=int,
-                    help='maximum number of steps to train before terminating')
-parser.add_argument('-o', '--output_model_file', default=None,
-                    help='file to store the trained model outputs')
-parser.add_argument('-t', '--tracking', action='store_true',
-                    help='turn on tracking outputs')
-
+parser = CNNArgumentParser()
 args = parser.parse_args()
 
 def main():
