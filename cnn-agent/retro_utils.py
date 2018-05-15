@@ -1,20 +1,6 @@
-def parse_local(args):
-    """ Return whether the job should run in local or remote mode """
-    if len(args) > 1 and (args[1] == "local" or args[1] == "aws"):
-        return True
-    else:
-        return False
-
-def parse_aws(args):
-    """ Return whether the job is running on AWS (to skip rendering) """
-    if len(args) > 1 and args[1] == "aws":
-        return True
-    else:
-        return False
-
-def get_environment(is_local):
+def get_environment(environment):
     """ Return a local or remote environment as requested """
-    if is_local:
+    if environment in ['aws','local']:
         from retro_contest.local import make
         env = make(game='SonicTheHedgehog-Genesis', state='LabyrinthZone.Act1')
     else:

@@ -27,6 +27,8 @@ def CNNArgumentParser():
 
     # Add common arguments to all sub-parsers
     for p in [build, validate, test]:
+        p.add_argument('-v', '--environment', choices=['aws','local','remote'], default='local',
+                        help='environment script is running on to match display')
         p.add_argument('-f', '--log_folder', default='',
                         help='folder used to store all non-model outputs')
         p.add_argument('-m', '--load_model_file', default=None,

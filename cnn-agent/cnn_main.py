@@ -18,9 +18,6 @@ parser = CNNArgumentParser()
 args = parser.parse_args()
 
 def main():
-    is_local = args.local
-    is_aws = util.parse_aws(sys.argv)
-
     # Initialize and load the model to train
     model = BasicConvolutionNetwork(epsilon = args.epsilon,
         right_bias = args.right_bias)
@@ -37,7 +34,7 @@ def main():
     forecast_model = util.clone_checkpoint_nn(model)
 
     # Create the game environment
-    env = util.get_environment(is_local)
+    env = util.get_environment(args.environment)
 
     # Reset the game and get the initial screen
     obs = env.reset()
@@ -69,7 +66,7 @@ def main():
 
         if evaluator.get_count() % 1000 == 0:
             forecast_model = util.clone_checkpoint_nn(model)
-        if is_local and not is_aws:
+        if args.environment == 'local':
             env.render()
         if done:
             obs = env.reset()
