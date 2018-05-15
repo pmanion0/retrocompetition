@@ -1,7 +1,3 @@
-import torch
-
-from torch.autograd import Variable
-
 def parse_local(args):
     """ Return whether the job should run in local or remote mode """
     if len(args) > 1 and (args[1] == "local" or args[1] == "aws"):
@@ -15,14 +11,6 @@ def parse_aws(args):
         return True
     else:
         return False
-
-def get_screen_variable(obs):
-    """ Get the screen and convert from """
-    # Convert the obs into a PyTorch autograd Variable
-    s = Variable(torch.FloatTensor(obs))
-    # Convert from (h,w,d) to (d,h,w) and add batch dimension (unsqueeze)
-    s = s.permute(2,0,1).unsqueeze(0)
-    return s
 
 def get_environment(is_local):
     """ Return a local or remote environment as requested """

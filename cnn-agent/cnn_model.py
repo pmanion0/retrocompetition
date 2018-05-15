@@ -5,16 +5,13 @@ import numpy as np
 from retro_s3 import RetroS3Client
 from random import random, randint
 from torch import nn
+from torch.autograd import Variable
+
 
 class BasicConvolutionNetwork(nn.Module):
 
     def __init__(self, epsilon = 0.05, right_bias = 0):
-        ''' Screen (D,H,W): 3x224x320
-            Buttons: [B, A, MODE, START, UP, DOWN, LEFT, RIGHT, C, Y, X, Z]
-            Actions: [UP, DOWN, LEFT, RIGHT, (UP,LEFT), (UP,RIGHT), (DOWN,LEFT),
-                      (DOWN,RIGHT), A, B, C, X, Y, Z, (A,B), (B,C), (A,X),
-                      (B,Y), (C,Z), (X,Y), (Y,Z)]
-            '''
+        ''' Initialize DQN network '''
         super(BasicConvolutionNetwork, self).__init__()
 
         self.epsilon = epsilon
@@ -61,6 +58,15 @@ class BasicConvolutionNetwork(nn.Module):
         # Increase bias to move rightwards
         self.fc_layer[0].bias.data[10].add_(right_bias)
 
+
+    def convert_screen_to_input(self, obs):
+        ''' Convert the screen from an image into an array suitable for NN
+            Default Screen Size (D,H,W): 3x224x320 '''
+        # Convert the obs into a PyTorch autograd Variable
+        s = Variable(torch.FloatTensor(obs))
+        # Convert from (h,w,d) to (d,h,w) and add batch dimension (unsqueeze)
+        s = s.permute(2,0,1).unsqueeze(0)
+        return s
 
     def forward(self, x):
         out = self.conv_layer(x)

@@ -41,7 +41,7 @@ def main():
 
     # Reset the game and get the initial screen
     obs = env.reset()
-    current_screen = util.get_screen_variable(obs)
+    current_screen = model.convert_screen_to_input(obs)
 
     while evaluator.get_count() < args.max_step_count:
         # Get the Q value for the current screen
@@ -53,7 +53,7 @@ def main():
 
         # Apply the button presses and observe the results
         obs, reward, done, info = env.step(buttons)
-        next_screen = util.get_screen_variable(obs)
+        next_screen = model.convert_screen_to_input(obs)
 
         Q_future = forecast_model.forward(next_screen)
 
