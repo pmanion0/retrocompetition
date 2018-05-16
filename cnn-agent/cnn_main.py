@@ -18,65 +18,98 @@ parser = CNNArgumentParser()
 args = parser.parse_args()
 
 def main():
-    # Initialize and load the model to train
-    model = BasicConvolutionNetwork(epsilon = args.epsilon,
-        right_bias = args.right_bias)
-    evaluator = RetroEvaluator(log_folder = args.log_folder)
-    config = CNNConfig(gamma = args.gamma,
-        loss_func = F.smooth_l1_loss,
-        opt_func = optim.SGD)
+    model = None
+    config = None
 
-    if args.load_model_file != None:
+    if args.mode == 'build':
+        # Define all the model and config parameters needed for training
+        model = BasicConvolutionNetwork(
+            epsilon = args.epsilon,
+            right_bias = args.right_bias
+        )
+
+        config = CNNConfig(
+            gamma = args.gamma,
+            loss_func = F.smooth_l1_loss,
+            opt_func = optim.SGD,
+            forecast_update_interval = 1000
+        )
+
+        if args.load_model_file != None:
+            model.load_model(args.load_model_file)
+
+        config.init_optimizer(model.parameters())
+
+    elif args.mode in ['validate','test']:
+        model = BasicConvolutionNetwork()
         model.load_model(args.load_model_file)
-    config.init_optimizer(model.parameters())
 
-    # Create forecast model for future rewards
-    forecast_model = util.clone_checkpoint_nn(model)
+    # Set network to eval mode and do not track gradient if not training
+    if args.mode in ['validate','train']:
+        model.eval()
+        model.turn_off_gradients()
 
-    # Create the game environment
-    env = util.get_environment(args.environment)
+    evaluator = RetroEvaluator(
+        log_folder = args.log_folder
+    )
+
+    game_env = util.get_environment(args.environment)
 
     # Reset the game and get the initial screen
-    obs = env.reset()
+    obs = game_env.reset()
     current_screen = model.convert_screen_to_input(obs)
 
     while evaluator.get_count() < args.max_step_count:
         # Get the Q value for the current screen
-        Q_estimated = model.forward(current_screen)
+        Q_estimate = model.forward(current_screen)
 
         # Determine the optimal buttons to press
-        action = model.get_action(Q_estimated)
+        action = model.get_action(Q_estimate)
         buttons = model.convert_action_to_buttons(action)
 
         # Apply the button presses and observe the results
-        obs, reward, done, info = env.step(buttons)
+        obs, reward, done, info = game_env.step(buttons)
+
+        # Reset the screen if the game round was termianted
+        if done:
+            obs = game_env.reset()
+
         next_screen = model.convert_screen_to_input(obs)
 
-        Q_future = forecast_model.forward(next_screen)
+        summary = {'Q_estimate': Q_estimate, 'action': action, 'reward': reward}
 
-        # Calculate the loss
-        loss = config.calculate_loss(Q_estimated, reward, Q_future)
-        action_mask = torch.zeros_like(loss)
-        action_mask[0, action] = 1
+        if args.mode == 'build':
+            # Periodically create or update a forecast model for future rewards
+            if config.is_forecast_update(evaluator.get_count()):
+                forecast_model = util.clone_checkpoint_nn(model)
 
-        # Run the gradient (only for chosen action -- zero all other gradients)
-        config.optimizer.zero_grad()
-        loss.backward(action_mask)
-        config.optimizer.step()
+            # Estimate the future Q-value options
+            if done:
+                Q_future = torch.zeros_like(Q_estimate)
+            else:
+                Q_future = forecast_model.forward(next_screen)
 
-        if evaluator.get_count() % 1000 == 0:
-            forecast_model = util.clone_checkpoint_nn(model)
+            # Calculate the loss and create a mask identifying the action taken
+            loss = config.calculate_loss(Q_estimate, reward, Q_future)
+            action_mask = torch.zeros_like(loss)
+            action_mask[0, action] = 1
+
+            # Run gradient only for chosen action - zero all others with mask
+            config.optimizer.zero_grad()
+            loss.backward(action_mask)
+            config.optimizer.step()
+
+            summary.update({'loss': loss, 'Q_future': Q_future})
+
+        # Add all added summary information to the evaluator
+        evaluator.summarize_step(**summary)
+
         if args.environment == 'local':
-            env.render()
-        if done:
-            obs = env.reset()
-
-        evaluator.summarize_step(Q_estimated, action, reward, loss, Q_future, next_screen)
-        current_screen = next_screen
-
-        # Output useful diagnostic figures during training (SLOW!)
+            game_env.render()
         if args.tracking:
             evaluator.output_tracking_image()
+
+        current_screen = next_screen
 
     if args.output_model_file != None:
         out_path = os.path.expanduser(args.output_model_file)
