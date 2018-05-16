@@ -13,7 +13,8 @@ class RetroEvaluator:
         self.log_folder = log_folder
         self.memory = deque([], queue_memory)
 
-    def summarize_step(self, Q_estimate, action, reward, loss, Q_future, next_screen):
+    def summarize_step(self, Q_estimate = None, action = None, reward = None,
+                       loss = None, Q_future = None, next_screen = None):
         ''' Provides evaluator the summary of the last step '''
         memory = {'Q_estimate': Q_estimate, 'action': action, 'reward': reward,
             'loss': loss, 'Q_future': Q_future, 'screen': next_screen}
