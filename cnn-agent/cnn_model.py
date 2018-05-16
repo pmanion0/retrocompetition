@@ -75,6 +75,12 @@ class BasicConvolutionNetwork(nn.Module):
         out = self.fc_layer(out)
         return out
 
+    def turn_off_gradients(self):
+        for param in self.conv_layer.parameters():
+            param.requires_grad = False
+        for param in self.fc_layer.parameters():
+            param.requires_grad = False
+
     def get_buttons(self, q_values):
         ''' Return an epsilon-greedy optimal policy given the Q values '''
         action = self.get_action(q_values)
