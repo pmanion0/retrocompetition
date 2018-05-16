@@ -74,18 +74,18 @@ You need to create these keys first if you haven't have them yet:
 
 2. **Export Environment Variables:** add the following lines to your shell setup script of choice, e.g. `~/.bash_profile` on Mac, to define environment variables needed for AWS in the `aws.sh` script and Ansible:
 
-`export AWS_ACCESS_KEY_ID=...`  
+    `export AWS_ACCESS_KEY_ID=...`  
 
-`export AWS_SECRET_ACCESS_KEY=...` 
+    `export AWS_SECRET_ACCESS_KEY=...` 
 
-`export AWS_KEY_NAME=...` 
+    `export AWS_KEY_NAME=...` 
 
 
 3. **Install Python packages**
 
-**Install Ansible:** [use instruction](http://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html) by picking the corresponding operation system. If you use MAC, you can check [this instruction](http://docs.ansible.com/ansible/latest/installation_guide/inEC2_ip**tro_installation.html#latest-releases-via-pip) directly.
+- **Install Ansible:** [use instruction](http://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html) by picking the corresponding operation system. If you use MAC, you can check [this instruction](http://docs.ansible.com/ansible/latest/installation_guide/inEC2_ip**tro_installation.html#latest-releases-via-pip) directly.
 
- **Install Boto3** with `pip install boto3` or `sudo pip install boto3`
+ - **Install Boto3** with `pip install boto3` or `sudo pip install boto3`
 
 
 4. **Apply for access to Amazon GPU instances** if you need GPU for your project
@@ -96,9 +96,9 @@ You need to create these keys first if you haven't have them yet:
 
 We can run `aws.sh` to launch, setup and connect to EC2 instance:
 
--**Launch an EC2 instance:** type `./aws.sh launch **instance_type**` with the default instance type = `p2.xlarge` to launch an EC2 instance, and 
+- **Launch an EC2 instance:** type `./aws.sh launch **instance_type**` with the default instance type = `p2.xlarge` to launch an EC2 instance, and 
 
--**Set up the EC2 instance:** type `./aws.sh setup **EC2_ip**`  with your EC2 instance ip address. This will automatically install all the software/packages described above for the retro project. If you want to upload the game ROM to EC2 as well, simply copy them to the local directory 
+- **Set up the EC2 instance:** type `./aws.sh setup **EC2_ip**`  with your EC2 instance ip address. This will automatically install all the software/packages described above for the retro project. If you want to upload the game ROM to EC2 as well, simply copy them to the local directory 
 
 - **Connect to the EC2 instace:** type `./aws.sh setup **EC2_ip**` with the EC2 ip address. 
 
