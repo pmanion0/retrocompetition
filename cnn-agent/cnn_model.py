@@ -15,6 +15,7 @@ class BasicConvolutionNetwork(nn.Module):
         super(BasicConvolutionNetwork, self).__init__()
 
         self.epsilon = epsilon
+        self.right_bias = right_bias
         self.s3_client = RetroS3Client()
 
         # Number of possible buttons (can be 0 for off, 1 for on)
@@ -120,13 +121,16 @@ class BasicConvolutionNetwork(nn.Module):
         ''' Save model to a local file path or buffer '''
         torch.save({
             'model': self.state_dict(),
-            'epsilon': self.epsilon
+            'epsilon': self.epsilon,
+            'right_bias': self.right_bias
         }, path_or_buffer)
 
     def load_model(self, path_or_buffer):
         ''' Load model from a local file path or buffer '''
         loaded_dict = torch.load(path_or_buffer)
         self.epsilon = loaded_dict['epsilon']
+        self.right_bias = loaded_dict['right_bias']
+        self.s3_client = RetroS3Client()
         self.load_state_dict(loaded_dict['model'])
 
     def save_model_s3(self, model_name):
