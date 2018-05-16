@@ -85,7 +85,7 @@ You need to create these keys first if you haven't have them yet:
 
 - **Install Ansible:** [use instruction](http://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html) by picking the corresponding operation system. If you use MAC, you can check [this instruction](http://docs.ansible.com/ansible/latest/installation_guide/inEC2_ip**tro_installation.html#latest-releases-via-pip) directly.
 
- - **Install Boto3** with `pip install boto3` or `sudo pip install boto3`
+ - **Install Boto3:** `pip install boto3` or `sudo pip install boto3`
 
 
 4. **Apply for access to Amazon GPU instances** if you need GPU for your project
@@ -98,7 +98,7 @@ We can run `aws.sh` to launch, setup and connect to EC2 instance:
 
 - **Launch an EC2 instance:** type `./aws.sh launch **instance_type**` with the default instance type = `p2.xlarge` to launch an EC2 instance, and 
 
-- **Set up the EC2 instance:** type `./aws.sh setup **EC2_ip**`  with your EC2 instance ip address. This will automatically install all the software/packages described above for the retro project. If you want to upload the game ROM to EC2 as well, simply copy them to the local directory 
+- **Set up the EC2 instance:** type `./aws.sh setup **EC2_ip**`  with your EC2 instance ip address. This will automatically install all the software/packages described above for the retro project. If you want to upload the game ROM to EC2 as well, simply copy them to the local directory 'ansible/remote_files/', e.g. `ansible/remote_files/SonicTheHedgehog-Genesis/rom.md`.
 
 - **Connect to the EC2 instace:** type `./aws.sh setup **EC2_ip**` with the EC2 ip address. 
 
