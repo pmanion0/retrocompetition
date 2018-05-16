@@ -1,10 +1,11 @@
 from torch.autograd import Variable
 
 class CNNConfig:
-    def __init__(self, gamma, loss_func, opt_func):
+    def __init__(self, gamma, loss_func, opt_func, forecast_update_interval):
         self.gamma = gamma
         self.loss_func = loss_func
         self.opt_func = opt_func
+        self.forecast_update_interval = forecast_update_interval
 
     def calculate_loss(self, Q_estimated, actual_reward, Q_future):
         ''' Calculate the loss to return to the network '''
@@ -14,3 +15,6 @@ class CNNConfig:
 
     def init_optimizer(self, params):
         self.optimizer = self.opt_func(params, lr = 1e-8, momentum=0.9)
+
+    def is_forecast_update(self, count):
+        return count % self.forecast_update_interval == 0
