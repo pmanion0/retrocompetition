@@ -88,8 +88,8 @@ You need to create these keys first if you haven't have them yet:
  - **Install Boto3:** `pip install boto3` or `sudo pip install boto3`
 
 
-4. **Apply for access to Amazon GPU instances** if you need GPU for your project
-
+4. **Apply for access to Amazon GPU instances** if you need GPU for the project
+Amazon requires you to apply access to its GPU instance resources before you are able to launch a GPU instance (such as the default p2.xlarge for `aws.sh`). Check [here](https://aws.amazon.com/ec2/elastic-gpus/) to apply for the access (??? need to check the link)
 
 
 5. **Test Run aws.sh**
