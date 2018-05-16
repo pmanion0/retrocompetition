@@ -3,7 +3,7 @@ import argparse
 def CNNArgumentParser():
     ''' Create a command line argument parser for the cnn_main.py '''
     parser = argparse.ArgumentParser()
-    subparser = parser.add_subparsers()
+    subparser = parser.add_subparsers(dest='mode')
 
     # Add BUILD only arguments
     build = subparser.add_parser('build',
