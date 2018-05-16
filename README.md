@@ -43,17 +43,6 @@ Here are simplified instructions to get up and runnning with the Gym environment
 
 2. **Login to Remote Docker:** run `docker login retrocontestajvidhoekmrcpqzt.azurecr.io --username retrocontestajvidhoekmrcpqzt  --password 9zqhOlFc=EohEXrXfWi6mKbR9wMAXTB4` to connect to our remote docker environment using our team username and password
 
-## Add AWS Environment Variables (Skip if Not Using AWS)
-
-1. **Export Environment Variables:** add the following lines to your shell setup script of choice, e.g. `~/.bash_profile` on Mac, to define environment variables needed for AWS in the `aws.sh` script and Ansible:
-
-`export AWS_ACCESS_KEY_ID=...` : secret access ID from EC2 console
-
-`export AWS_SECRET_ACCESS_KEY=...` : secret key password from EC2 console
-
-`export AWS_KEY_NAME=...` : name of SSH key without .pem (located at `~/.ssh/**$AWS_KEY_NAME**.pem`)
-
-
 ## Test It Out!
 
 1. **Run It Locally:** with `python random-agent/random-agent-contest.py local`
@@ -62,7 +51,51 @@ Here are simplified instructions to get up and runnning with the Gym environment
 
 3. **Test Run the Docker:** with `./docker.sh test random-agent v1`
 
+## Set up AWS EC2 pipeline (Skip if Not Using AWS)
 
+1. **Create AWS keys:** Three keys are required to set up AWS as below
+
+`AWS_ACCESS_KEY_ID`: secret access ID from EC2 console
+
+`AWS_SECRET_ACCESS_KEY` : secret key password from EC2 console
+
+`AWS_KEY_NAME`: name of SSH key(EC2 key pairs) without .pem (located at `~/.ssh/**$AWS_KEY_NAME**.pem`)
+
+**Note**: make sure your region is set as `US East (N. Virginia)`. The SSH key is specific for each region.
+
+If you already have them created, skip this and move to step 2.
+
+ - [see instruction](https://docs.aws.amazon.com/general/latest/gr/managing-aws-access-keys.html) to create both AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY
+
+ - [Create EC2 key pairs](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html#having-ec2-create-your-key-pair) to obtain `**$AWS_KEY_NAME**.pem`. Then move it to `~/.ssh/**$AWS_KEY_NAME**.pem` and set the permission `chmod 400 ~/.ssh/**$AWS_KEY_NAME**.pem`
+
+2. **Export Environment Variables:** add the following lines to your shell setup script of choice, e.g. `~/.bash_profile` on Mac, to define environment variables needed for AWS in the `aws.sh` script and Ansible:
+
+`export AWS_ACCESS_KEY_ID=...`  
+
+`export AWS_SECRET_ACCESS_KEY=...` 
+
+`export AWS_KEY_NAME=...` 
+
+3. **Install Python packages**
+
+Install Ansible: [use instruction](http://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html) by picking the corresponding operation system. If you use MAC, you can check [this instruction](http://docs.ansible.com/ansible/latest/installation_guide/inEC2_ip**tro_installation.html#latest-releases-via-pip) directly.
+
+Install Boto3 with `pip install boto3` or `sudo pip install boto3`
+
+4. **Apply for access to Amazon GPU instances** if you need GPU for your project
+
+5. **Test Run aws.sh**
+- Launch an EC2 instance: type `./aws.sh launch **instance_type**` with the default instance type = `p2.xlarge` to launch an EC2 instance, and 
+
+- Set up the EC2 instance: type `./aws.sh setup **EC2_ip**`  with your EC2 instance ip address. This will automatically install all the software/packages described above for the retro project. If you want to upload the game ROM to EC2 as well, simply copy them to the local directory 
+
+- Connect to the EC2 instace: type `./aws.sh setup **EC2_ip**` with the EC2 ip address. 
+
+**Note:** If you have Anaconda and/or more than one python versions installed in your computer, you may run into the error message like "Boto3 doesn't exist" though you already installed it.  In this case, you could add one extra argument to `aws.sh` to specify ansible_python_interpreter when running ansible-playbook, e.g.
+`ansible-playbook ansible/ansible-aws.yml \
+    --private-key=$AWS_SSH_KEY \
+    --extra-vars "ssh_key_name=$AWS_KEY_NAME instance_type=$INSTANCE_TYPE ansible_python_interpreter=~/anaconda3/bin/python"`
 
 ## Skipping Homebrew
 I don't like Homebrew because of all the permissions changes, so I worked around the dynamic library thing with this code:
