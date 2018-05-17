@@ -40,8 +40,6 @@ def CNNArgumentParser():
                         help='folder used to store all non-model outputs')
         p.add_argument('-t', '--tracking', action='store_true',
                         help='turn on tracking outputs')
-        p.add_argument('-l', '--local', action='store_true',
-                        help='indicator to initialize local environment with video')
         p.add_argument('-c', '--max_step_count', default=100000, type=int,
                         help='maximum number of steps to train before terminating')
 
