@@ -36,7 +36,6 @@ def main():
             forecast_update_interval = 1000
         )
         model = BasicConvolutionNetwork(
-            config = config,
             epsilon = args.epsilon,
             right_bias = args.right_bias
         )
