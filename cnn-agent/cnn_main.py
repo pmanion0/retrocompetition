@@ -9,6 +9,7 @@ import torch.nn.functional as F
 from warnings import warn
 from torch import nn
 from torch.autograd import Variable
+from retro_s3 import RetroS3Client
 
 from cnn_model import BasicConvolutionNetwork
 from cnn_config import CNNConfig
@@ -19,7 +20,9 @@ parser = CNNArgumentParser()
 args = parser.parse_args()
 
 def main():
+    s3 = None
     model = None
+    config = None
 
     if args.mode in ['validate','test'] and args.load_model_file == None:
         warn("Running " + args.mode + " mode without loading existing model")
@@ -37,17 +40,18 @@ def main():
             epsilon = args.epsilon,
             right_bias = args.right_bias
         )
-        model.config.init_optimizer(model.parameters())
+        config.init_optimizer(model.parameters())
     else:
-        model = BasicConvolutionNetwork()
-        model.load_model_s3(args.load_model_file)
+        s3 = RetroS3Client()
+        model_buffer, config_buffer = s3.load_model_config_buffer(args.load_model_file)
+        model = BasicConvolutionNetwork().load(model_buffer)
+        config = CNNConfig().load(config_buffer)
 
     # Set network to eval mode and do not track gradient if not training
     if args.mode in ['validate','train']:
         model.eval()
         model.turn_off_gradients()
 
-    config = model.config
     evaluator = RetroEvaluator(
         log_folder = args.log_folder
     )
@@ -112,7 +116,8 @@ def main():
 
     if args.output_model_file != None:
         out_path = os.path.expanduser(args.output_model_file)
-        model.save_model(out_path)
+        s3 = (RetroS3Client() if s3 == None else s3)
+        s3.save_model(out_path)
 
 
 if __name__ == '__main__':
