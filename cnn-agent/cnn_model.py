@@ -9,11 +9,10 @@ from torch.autograd import Variable
 
 class BasicConvolutionNetwork(nn.Module):
 
-    def __init__(self, config, epsilon = 0.05, right_bias = 0):
+    def __init__(self, epsilon = 0.05, right_bias = 0):
         ''' Initialize DQN network '''
         super(BasicConvolutionNetwork, self).__init__()
 
-        self.config = config
         self.epsilon = epsilon
         self.right_bias = right_bias
         self.s3_client = RetroS3Client()
@@ -128,8 +127,7 @@ class BasicConvolutionNetwork(nn.Module):
         torch.save({
             'model': self.state_dict(),
             'epsilon': self.epsilon,
-            'right_bias': self.right_bias,
-            'config': self.config
+            'right_bias': self.right_bias
         }, path_or_buffer)
 
     def load_model(self, path_or_buffer):
@@ -137,6 +135,5 @@ class BasicConvolutionNetwork(nn.Module):
         loaded_dict = torch.load(path_or_buffer)
         self.epsilon = loaded_dict['epsilon']
         self.right_bias = loaded_dict['right_bias']
-        self.config = loaded_dict['config']
         self.load_state_dict(loaded_dict['model'])
         self.s3_client = RetroS3Client()
