@@ -39,12 +39,16 @@ def main():
             epsilon = args.epsilon,
             right_bias = args.right_bias
         )
-        config.init_optimizer(model.parameters())
     else:
+        model = BasicConvolutionNetwork()
+        config = CNNConfig()
         s3 = RetroS3Client()
+
         model_buffer, config_buffer = s3.load_model_config_buffer(args.load_model_file)
-        model = BasicConvolutionNetwork().load(model_buffer)
-        config = CNNConfig().load(config_buffer)
+        model.load(model_buffer)
+        config.load(config_buffer)
+
+    config.init_optimizer(model.parameters())
 
     # Set network to eval mode and do not track gradient if not training
     if args.mode in ['validate','train']:
@@ -116,7 +120,7 @@ def main():
     if args.output_model_file != None:
         out_path = os.path.expanduser(args.output_model_file)
         s3 = (RetroS3Client() if s3 == None else s3)
-        s3.save_model(out_path)
+        s3.save_model(model, config, out_path)
 
 
 if __name__ == '__main__':
