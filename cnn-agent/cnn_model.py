@@ -2,7 +2,6 @@ import torch
 import io
 import numpy as np
 
-from retro_s3 import RetroS3Client
 from random import random, randint
 from torch import nn
 from torch.autograd import Variable
@@ -141,14 +140,3 @@ class BasicConvolutionNetwork(nn.Module):
         self.config = loaded_dict['config']
         self.load_state_dict(loaded_dict['model'])
         self.s3_client = RetroS3Client()
-
-    def save_model_s3(self, model_name):
-        ''' Store model directly onto S3 '''
-        buffer = io.BytesIO()
-        self.save_model(buffer)
-        self.s3_client.save_from_buffer(buffer, model_name)
-
-    def load_model_s3(self, model_name):
-        ''' Load model directly off S3 '''
-        buffer = self.s3_client.load_to_buffer(model_name)
-        self.load_model(buffer)
