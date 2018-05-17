@@ -12,6 +12,7 @@ class RetroS3Client:
 
     def save_from_buffer(self, buffer, file_name):
         ''' Save a buffer onto S3 with the given file name '''
+        buffer.seek(0)
         self.s3_client.put_object(
             Body = buffer,
             Bucket = self.bucket,
@@ -24,13 +25,27 @@ class RetroS3Client:
             Key = self.root_dir + model_name)
 
         buffer = io.BytesIO(initial_bytes = response['Body'].read())
+        buffer.seek(0)
+        return buffer
+
+    def input_to_buffer(self, input):
+        ''' Save the input into a buffer using its .save() method '''
+        buffer = io.BytesIO()
+        input.save(buffer)
+        buffer.seek(0)
         return buffer
 
     def load_model_config_buffer(self, model_name):
         ''' Load a (model, config) pair off S3 '''
         buffer = self.load_to_buffer(model_name)
         loaded_dict = torch.load(buffer)
-        return loaded_dict['model'], loaded_dict['config']
+
+        model_buffer = loaded_dict['model']
+        config_buffer = loaded_dict['config']
+        model_buffer.seek(0)
+        config_buffer.seek(0)
+
+        return model_buffer, config_buffer
 
     def save_model(self, model, config, model_name):
         ''' Store a (model, config) pair directly onto S3 '''
@@ -40,9 +55,3 @@ class RetroS3Client:
             'config': self.input_to_buffer(config)
         }, buffer)
         self.save_from_buffer(buffer, model_name)
-
-    def input_to_buffer(self, input):
-        ''' Save the input into a buffer using its .save() method '''
-        buffer = io.BytesIO()
-        input.save(buffer)
-        return buffer
