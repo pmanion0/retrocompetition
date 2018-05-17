@@ -1,13 +1,20 @@
+import torch
+
+import torch.nn.functional as F
+import torch.optim as optim
+
 from torch.autograd import Variable
 
 class CNNConfig:
-    def __init__(self, gamma, loss_func, opt_func, forecast_update_interval):
+    def __init__(self, gamma = 0.99, loss_func = F.smooth_l1_loss,
+                 opt_func = optim.SGD, forecast_update_interval = 1e3,
+                 lr = 1e-8, momentum = 0.9):
         self.gamma = gamma
         self.loss_func = loss_func
         self.opt_func = opt_func
         self.forecast_update_interval = forecast_update_interval
-        self.lr = 1e-8
-        self.momentum = 0.9
+        self.lr = lr
+        self.momentum = momentum
 
     def calculate_loss(self, Q_estimated, actual_reward, Q_future):
         ''' Calculate the loss to return to the network '''
@@ -17,7 +24,8 @@ class CNNConfig:
 
     def init_optimizer(self, params):
         self.optimizer = self.opt_func(
-            params, lr = self.lr,
+            params,
+            lr = self.lr,
             momentum = self.momentum
         )
 
