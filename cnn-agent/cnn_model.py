@@ -122,7 +122,7 @@ class BasicConvolutionNetwork(nn.Module):
             if value == 1
         ])
 
-    def save_model(self, path_or_buffer):
+    def save(self, path_or_buffer):
         ''' Save model to a local file path or buffer '''
         torch.save({
             'model': self.state_dict(),
@@ -130,7 +130,7 @@ class BasicConvolutionNetwork(nn.Module):
             'right_bias': self.right_bias
         }, path_or_buffer)
 
-    def load_model(self, path_or_buffer):
+    def load(self, path_or_buffer):
         ''' Load model from a local file path or buffer '''
         loaded_dict = torch.load(path_or_buffer)
         self.epsilon = loaded_dict['epsilon']
