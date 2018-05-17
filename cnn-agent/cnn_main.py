@@ -6,6 +6,7 @@ import retro_utils as util
 import torch.optim as optim
 import torch.nn.functional as F
 
+from warnings import warn
 from torch import nn
 from torch.autograd import Variable
 
@@ -19,36 +20,34 @@ args = parser.parse_args()
 
 def main():
     model = None
-    config = None
 
-    if args.mode == 'build':
+    if args.mode in ['validate','test'] and args.load_model_file == None:
+        warn("Running " + args.mode + " mode without loading existing model")
+
+    if args.load_model_file == None:
         # Define all the model and config parameters needed for training
-        model = BasicConvolutionNetwork(
-            epsilon = args.epsilon,
-            right_bias = args.right_bias
-        )
-
         config = CNNConfig(
             gamma = args.gamma,
             loss_func = F.smooth_l1_loss,
             opt_func = optim.SGD,
             forecast_update_interval = 1000
         )
-
-        if args.load_model_file != None:
-            model.load_model(args.load_model_file)
-
-        config.init_optimizer(model.parameters())
-
-    elif args.mode in ['validate','test']:
+        model = BasicConvolutionNetwork(
+            config = config,
+            epsilon = args.epsilon,
+            right_bias = args.right_bias
+        )
+        model.config.init_optimizer(model.parameters())
+    else:
         model = BasicConvolutionNetwork()
-        model.load_model(args.load_model_file)
+        model.load_model_s3(args.load_model_file)
 
     # Set network to eval mode and do not track gradient if not training
     if args.mode in ['validate','train']:
         model.eval()
         model.turn_off_gradients()
 
+    config = model.config
     evaluator = RetroEvaluator(
         log_folder = args.log_folder
     )
