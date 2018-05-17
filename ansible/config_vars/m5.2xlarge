@@ -1,0 +1,8 @@
+aws_region: us-east-1
+
+# Instance Configuration
+instance_type: m5.2xlarge
+spot_price: 0.20
+
+# Deep Learning CUDA9 AMI
+ami_id: ami-dff741a0
