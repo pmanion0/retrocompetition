@@ -51,11 +51,11 @@ Here are simplified instructions to get up and runnning with the Gym environment
 
 3. **Test Run the Docker:** with `./docker.sh test random-agent v1`
 
-## Set up AWS EC2 pipeline (Skip if Not Using AWS)
+## Set up AWS EC2 (Skip if Not Using AWS)
 
 1. **Create AWS keys** 
 
-Three keys are required to set up AWS as below
+Three keys are required to set up AWS:
 
     `AWS_ACCESS_KEY_ID`: secret access ID from EC2 console
 
@@ -63,7 +63,7 @@ Three keys are required to set up AWS as below
 
     `AWS_KEY_NAME`: name of SSH key(EC2 key pairs) without .pem (located at `~/.ssh/**$AWS_KEY_NAME**.pem`)
 
-You need to create these keys first if you haven't have them yet:
+You need to set up these keys first if you haven't created them yet:
     
    - [See instruction](https://docs.aws.amazon.com/general/latest/gr/managing-aws-access-keys.html) to create both AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY
 
@@ -80,25 +80,27 @@ You need to create these keys first if you haven't have them yet:
 
     `export AWS_KEY_NAME=...` 
 
+**Note**: Make sure you have your Github key saved in the folder ~/.ssh and named as `github_rsa`. You could also change the Github key directory and name in `aws.sh`, e.g. `GITHUB_KEY=~/.ssh/**Your_Github_Keyname**`.
+
 
 3. **Install Python packages**
 
-- **Install Ansible:** [use instruction](http://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html) by picking the corresponding operation system. If you use MAC, you can check [this instruction](http://docs.ansible.com/ansible/latest/installation_guide/inEC2_ip**tro_installation.html#latest-releases-via-pip) directly.
+- **Install Ansible:** [use instruction](http://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html) by choosing the corresponding operation system. If you use MAC, you can check [this instruction](http://docs.ansible.com/ansible/latest/installation_guide/inEC2_ip**tro_installation.html#latest-releases-via-pip) directly.
 
  - **Install Boto3:** `pip install boto3` or `sudo pip install boto3`
 
 
 4. **Apply for access to Amazon GPU instances** if you need GPU for the project
-Amazon requires you to apply access to its GPU instance resources before you are able to launch a GPU instance (such as the default p2.xlarge for `aws.sh`). Check [here](https://aws.amazon.com/ec2/elastic-gpus/) to apply for the access (??? need to check the link)
+Amazon requires you to apply access to its GPU instance type before you are able to launch a GPU instance (such as the default p2.xlarge for `aws.sh`). Check [here](https://console.aws.amazon.com/support/) to increase the service limit for EC2 Instances. Three types of GPU instance are configured here: `p2.xlarge`, `p3.2xlarge` and `p3.8xlarge` and you need to request for each of those you plan to use.
 
 
 5. **Test Run aws.sh**
 
-We can run `aws.sh` to launch, setup and connect to EC2 instance:
+We can simply run `aws.sh` to launch, setup and connect to EC2 instance.
 
-- **Launch an EC2 instance:** type `./aws.sh launch **instance_type**` with the default instance type = `p2.xlarge` to launch an EC2 instance, and 
+- **Launch an EC2 instance:** type `./aws.sh launch **instance_type**` with the default instance type `p2.xlarge` to launch an EC2 instance.
 
-- **Set up the EC2 instance:** type `./aws.sh setup **EC2_ip**`  with your EC2 instance ip address. This will automatically install all the software/packages described above for the retro project. If you want to upload the game ROM to EC2 as well, simply copy them to the local directory 'ansible/remote_files/', e.g. `ansible/remote_files/SonicTheHedgehog-Genesis/rom.md`.
+- **Set up the EC2 instance:** type `./aws.sh setup **EC2_ip**`  with your EC2 instance ip address. This will automatically install all the software/packages described above for the retro project. If you want to upload the game ROM to EC2 as well, simply copy them to the local directory ansible`/remote_files/`, e.g. `ansible/remote_files/SonicTheHedgehog-Genesis/rom.md`.
 
 - **Connect to the EC2 instace:** type `./aws.sh setup **EC2_ip**` with the EC2 ip address. 
 
