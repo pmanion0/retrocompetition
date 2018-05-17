@@ -36,7 +36,7 @@ class CNNConfig:
         ''' Save config to a local file path or buffer '''
         torch.save({
             'gamma': self.gamma,
-            'loss_func': self.loss_func,
+            #'loss_func': self.loss_func,
             'opt_func': self.opt_func,
             'forecast_update_interval': self.forecast_update_interval,
             'lr': self.lr,
@@ -47,7 +47,7 @@ class CNNConfig:
         ''' Load config from a local file path or buffer '''
         loaded_dict = torch.load(path_or_buffer)
         self.gamma = loaded_dict['gamma']
-        self.loss_func = loaded_dict['loss_func']
+        #self.loss_func = loaded_dict['loss_func']
         self.opt_func = loaded_dict['opt_func']
         self.forecast_update_interval = loaded_dict['forecast_update_interval']
         self.lr = loaded_dict['lr']
