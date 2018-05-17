@@ -15,7 +15,6 @@ class BasicConvolutionNetwork(nn.Module):
 
         self.epsilon = epsilon
         self.right_bias = right_bias
-        self.s3_client = RetroS3Client()
 
         # Number of possible buttons (can be 0 for off, 1 for on)
         self.button_index_list = ["B", "A", "MODE", "START", "UP", "DOWN",
@@ -136,4 +135,3 @@ class BasicConvolutionNetwork(nn.Module):
         self.epsilon = loaded_dict['epsilon']
         self.right_bias = loaded_dict['right_bias']
         self.load_state_dict(loaded_dict['model'])
-        self.s3_client = RetroS3Client()
