@@ -123,12 +123,13 @@ class BasicConvolutionNetwork(nn.Module):
             if value == 1
         ])
 
-    def save_model(self, path_or_buffer):
+    def save_model(self, path_or_buffer, config = None):
         ''' Save model to a local file path or buffer '''
         torch.save({
             'model': self.state_dict(),
             'epsilon': self.epsilon,
-            'right_bias': self.right_bias
+            'right_bias': self.right_bias,
+            'config': config
         }, path_or_buffer)
 
     def load_model(self, path_or_buffer):
@@ -136,16 +137,18 @@ class BasicConvolutionNetwork(nn.Module):
         loaded_dict = torch.load(path_or_buffer)
         self.epsilon = loaded_dict['epsilon']
         self.right_bias = loaded_dict['right_bias']
-        self.s3_client = RetroS3Client()
         self.load_state_dict(loaded_dict['model'])
+        self.s3_client = RetroS3Client()
+        return loaded_dict['config']
 
-    def save_model_s3(self, model_name):
+    def save_model_s3(self, model_name, config = None):
         ''' Store model directly onto S3 '''
         buffer = io.BytesIO()
-        self.save_model(buffer)
+        self.save_model(buffer, config = config)
         self.s3_client.save_from_buffer(buffer, model_name)
 
     def load_model_s3(self, model_name):
         ''' Load model directly off S3 '''
         buffer = self.s3_client.load_to_buffer(model_name)
-        self.load_model(buffer)
+        config = self.load_model(buffer)
+        return config
