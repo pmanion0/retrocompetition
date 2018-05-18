@@ -9,7 +9,7 @@ from matplotlib import pyplot as plt
 class MPLPlotter:
 
     def __init_(self):
-        pass
+        raise ValueError("I AM NOT IMPLEMENTED AND PROBABLY DO NOT WORK!")
 
     def output_tracking_image(self, counter_index = None, filename = None):
         ''' Output the tracking image for the given index to a file or screen '''

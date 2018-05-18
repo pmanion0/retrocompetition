@@ -112,8 +112,6 @@ def main():
 
         if args.environment == 'local':
             game_env.render()
-        if args.tracking:
-            evaluator.output_tracking_image()
 
         current_screen = next_screen
 
