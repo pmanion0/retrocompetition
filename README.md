@@ -57,11 +57,11 @@ Here are simplified instructions to get up and runnning with the Gym environment
 
 Three keys are required to set up AWS:
 
-    `AWS_ACCESS_KEY_ID`: secret access ID from EC2 console
+     AWS_ACCESS_KEY_ID: secret access ID from EC2 console
 
-    `AWS_SECRET_ACCESS_KEY` : secret key password from EC2 console
+     AWS_SECRET_ACCESS_KEY : secret key password from EC2 console
 
-    `AWS_KEY_NAME`: name of SSH key(EC2 key pairs) without .pem (located at `~/.ssh/**$AWS_KEY_NAME**.pem`)
+     AWS_KEY_NAME: name of SSH key(EC2 key pairs) without .pem (located at `~/.ssh/**$AWS_KEY_NAME**.pem`)
 
 You need to set up these keys first if you haven't created them yet:
     
