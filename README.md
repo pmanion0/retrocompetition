@@ -80,7 +80,7 @@ You need to set up these keys first if you haven't created them yet:
 
     `export AWS_KEY_NAME=...` 
 
-**Note**: Make sure you have your Github key saved in the folder ~/.ssh and named as `github_rsa`. You could also change the Github key directory and name in `aws.sh`, e.g. `GITHUB_KEY=~/.ssh/**Your_Github_Keyname**`.
+**Note**: Make sure you have your Github key saved in the folder ~/.ssh and named as `github_rsa`. You could also change the Github key directory and name in `aws.sh`, e.g. `GITHUB_KEY=**your_dir_to_key**/**Your_Github_Keyname**`.
 
 
 3. **Install Python packages**
@@ -100,7 +100,7 @@ We can simply run `aws.sh` to launch, setup and connect to EC2 instance.
 
 - **Launch an EC2 instance:** type `./aws.sh launch **instance_type**` with the default instance type `p2.xlarge` to launch an EC2 instance.
 
-- **Set up the EC2 instance:** type `./aws.sh setup **EC2_ip**`  with your EC2 instance ip address. This will automatically install all the software/packages described above for the retro project. If you want to upload the game ROM to EC2 as well, simply copy them to the local directory ansible`/remote_files/`, e.g. `ansible/remote_files/SonicTheHedgehog-Genesis/rom.md`.
+- **Set up the EC2 instance:** type `./aws.sh setup **EC2_ip**`  with your EC2 instance ip address. This will automatically install all the software/packages described above for the retro project. If you want to upload the game ROM to EC2 as well, simply copy them to the local directory `ansible/remote_files/`, e.g. `ansible/remote_files/SonicTheHedgehog-Genesis/rom.md`.
 
 - **Connect to the EC2 instace:** type `./aws.sh setup **EC2_ip**` with the EC2 ip address. 
 
