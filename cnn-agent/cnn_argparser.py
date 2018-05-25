@@ -4,6 +4,7 @@ def CNNArgumentParser():
     ''' Create a command line argument parser for the cnn_main.py '''
     parser = argparse.ArgumentParser()
     subparser = parser.add_subparsers(dest='mode')
+    subparser.required = True
 
     # Add BUILD only arguments
     build = subparser.add_parser('build',
@@ -16,8 +17,6 @@ def CNNArgumentParser():
                         help='discount rate of rewards in future time steps')
     build.add_argument('-r', '--right_bias', default=0, type=float,
                         help='amount to increase initial bias term on running right')
-    build.add_argument('-m', '--load_model_file', default=None,
-                        help='file to load starting model parameters from')
 
     # Add VALIDATE only arguments
     validate = subparser.add_parser('validate',
@@ -27,20 +26,17 @@ def CNNArgumentParser():
     test = subparser.add_parser('test',
                         help='WARNING: NOT YET IMPLEMENTED')
 
-    # Add specific VALIDATE/TEST parameters
-    for p in [validate, test]:
-        p.add_argument('-m', '--load_model_file', required = True,
-                        help='model file to validate or test')
-
     # Add common arguments to all sub-parsers
     for p in [build, validate, test]:
         p.add_argument('-v', '--environment', choices=['aws','local','remote'], default='local',
                         help='environment script is running on to match display')
-        p.add_argument('-f', '--log_folder', default='',
+        p.add_argument('-f', '--log_folder', default='.', required=True,
                         help='folder used to store all non-model outputs')
         p.add_argument('-t', '--tracking', action='store_true',
                         help='turn on tracking outputs')
         p.add_argument('-c', '--max_step_count', default=100000, type=int,
                         help='maximum number of steps to train before terminating')
+        p.add_argument('-m', '--load_model_file', default=None,
+                        help='file to load starting model parameters from')
 
     return parser
