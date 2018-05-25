@@ -21,7 +21,7 @@ class RetroEvaluator:
         common_memory = {
             'action': action,
             'reward': reward,
-            'loss': float(loss[action]) # Only report true observed loss
+            'loss': float(loss[0,action]) # Only report true observed loss
         }
         selective_memory = {
             'counter': self.counter,
