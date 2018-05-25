@@ -20,7 +20,7 @@ parser = CNNArgumentParser()
 args = parser.parse_args()
 
 def main():
-    s3 = None
+    s3 = RetroS3Client()
     model = None
     config = None
 
@@ -43,7 +43,6 @@ def main():
     else:
         model = BasicConvolutionNetwork()
         config = CNNConfig()
-        s3 = RetroS3Client()
 
         model_buffer, config_buffer = s3.load_model_config_buffer(args.load_model_file)
         model.load(model_buffer)
@@ -108,6 +107,10 @@ def main():
 
             summary.update({'loss': loss, 'Q_future': Q_future})
 
+            if config.is_model_save(evaluator.get_count()) and args.output_model_file != None:
+                out_path = os.path.expanduser(args.log_folder + '/' + args.output_model_file)
+                s3.save_model(model, config, out_path)
+
         # Add all added summary information to the evaluator
         evaluator.summarize_step(**summary)
 
@@ -115,11 +118,6 @@ def main():
             game_env.render()
 
         current_screen = next_screen
-
-    if args.output_model_file != None:
-        out_path = os.path.expanduser(args.output_model_file)
-        s3 = (RetroS3Client() if s3 == None else s3)
-        s3.save_model(model, config, out_path)
 
 
 if __name__ == '__main__':
