@@ -17,6 +17,10 @@ def CNNArgumentParser():
                         help='discount rate of rewards in future time steps')
     build.add_argument('-r', '--right_bias', default=0, type=float,
                         help='amount to increase initial bias term on running right')
+    build.add_argument('-s', '--model_save_interval', default=1e4, type=int,
+                        help='steps between overwriting model saves')
+    build.add_argument('-f', '--forecast_update_interval', default=1e3, type=int,
+                        help='steps between update the Q-value future forecast model')
 
     # Add VALIDATE only arguments
     validate = subparser.add_parser('validate',

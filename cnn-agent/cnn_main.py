@@ -33,7 +33,8 @@ def main():
             gamma = args.gamma,
             loss_func = F.smooth_l1_loss,
             opt_func = optim.SGD,
-            forecast_update_interval = 1000
+            forecast_update_interval = args.forecast_update_interval,
+            model_save_interval = args.model_save_interval
         )
         model = BasicConvolutionNetwork(
             epsilon = args.epsilon,

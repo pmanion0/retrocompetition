@@ -8,11 +8,12 @@ from torch.autograd import Variable
 class CNNConfig:
     def __init__(self, gamma = 0.99, loss_func = F.smooth_l1_loss,
                  opt_func = optim.SGD, forecast_update_interval = 1e3,
-                 lr = 1e-8, momentum = 0.9):
+                 model_save_interval = 1e4, lr = 1e-8, momentum = 0.9):
         self.gamma = gamma
         self.loss_func = loss_func
         self.opt_func = opt_func
         self.forecast_update_interval = forecast_update_interval
+        self.model_save_interval = model_save_interval
         self.lr = lr
         self.momentum = momentum
 
@@ -31,6 +32,9 @@ class CNNConfig:
 
     def is_forecast_update(self, count):
         return count % self.forecast_update_interval == 0
+
+    def is_model_save(self, count):
+        return count % self.model_save_interval == 0
 
     def save(self, path_or_buffer):
         ''' Save config to a local file path or buffer '''
