@@ -13,7 +13,7 @@ class RetroS3Client:
         if self.root_dir[-1] != '/': # Add trailling / if not present
             self.root_dir += '/'
 
-    def save_from_buffer(self, buffer, file_name):
+    def save_buffer(self, buffer, file_name):
         ''' Save a buffer onto S3 with the given file name '''
         buffer.seek(0)
         self.s3_client.put_object(
