@@ -34,10 +34,8 @@ def CNNArgumentParser():
     for p in [build, validate, test]:
         p.add_argument('-v', '--environment', choices=['aws','local','remote'], default='local',
                         help='environment script is running on to match display')
-        p.add_argument('-f', '--log_folder', default='.', required=True,
+        p.add_argument('-l', '--log_folder', default='.', required=True,
                         help='folder used to store all non-model outputs')
-        p.add_argument('-t', '--tracking', action='store_true',
-                        help='turn on tracking outputs')
         p.add_argument('-c', '--max_step_count', default=100000, type=int,
                         help='maximum number of steps to train before terminating')
         p.add_argument('-m', '--load_model_file', default=None,
