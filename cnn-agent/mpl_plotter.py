@@ -107,3 +107,16 @@ class MPLPlotter:
 
         fig.tight_layout(pad=0)
         return fig
+
+    def get_memory_index(self, counter_index):
+        ''' Convert the time-step counter index into an index for pulling
+            information out of the memory queue '''
+        memory_index = self.counter - counter_index
+
+        if memory_index < 0:
+            raise ValueError('Desired index is in the future!')
+        elif memory_index > len(self.memory):
+            raise ValueError('Desired index is too far in the past ' +
+                '(outside memory size)!')
+        else:
+            return memory_index
