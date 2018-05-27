@@ -1,3 +1,5 @@
+import io
+
 def get_environment(environment):
     """ Return a local or remote environment as requested """
     if environment in ['aws','local']:
@@ -11,7 +13,12 @@ def get_environment(environment):
 
 def clone_checkpoint_nn(old_network):
     """ Create a clone of the given network with the same parameters """
+    new_network_buffer = io.BytesIO()
+    old_network.save(new_network_buffer)
+    new_network_buffer.seek(0)
+
     new_network = type(old_network)()
-    new_network.load_state_dict(old_network.state_dict())
+    new_network.load(new_network_buffer)
     new_network.eval()
+
     return new_network
