@@ -6,14 +6,19 @@ from random import random, randint
 from torch import nn
 from torch.autograd import Variable
 
+from torchvision.transforms.functional import to_pil_image
+from torchvision.transforms.functional import to_tensor
+
 
 class BasicConvolutionNetwork(nn.Module):
 
-    def __init__(self, epsilon = 0.05, right_bias = 0, img_to_grayscale = False):
+    def __init__(self, epsilon = 0.05, right_bias = 0, image_to_grayscale = False,
+                image_dimension = (100,100)):
         ''' Initialize DQN network '''
         super(BasicConvolutionNetwork, self).__init__()
 
-        self.img_to_grayscale = img_to_grayscale
+        self.image_dimension = image_dimension
+        self.image_to_grayscale = image_to_grayscale
         self.epsilon = epsilon
         self.right_bias = right_bias
 
@@ -38,34 +43,46 @@ class BasicConvolutionNetwork(nn.Module):
 
         self.action_count = len(self.action_index_to_string_map)
 
+        self.__init_network__()
+
+    def __init_network__(self):
         # Define neural network architecture
-        input_dimension = 1 if img_to_grayscale else 3
+        input_dimension = 1 if self.image_to_grayscale else 3
 
-        self.conv_layer = nn.Sequential(
-            nn.Conv2d(input_dimension, 10, 7, padding=3),
-            nn.ReLU(),
-            nn.MaxPool2d(4, stride=4), # 10x56x80
-            nn.Conv2d(10, 32, 3, padding=1),  # 32x56x80
-            nn.ReLU(),
-            nn.MaxPool2d(4, stride=4), # 32x14x20
-            nn.Conv2d(32, 64, 3, padding=1), # 64x14x20
-            nn.ReLU(),
-            nn.MaxPool2d(2, stride=2) # 64x7x10
-        )
+        if self.image_dimension == (320,224):
+            self.conv_layer = nn.Sequential(
+                nn.Conv2d(input_dimension, 10, 7, padding=3),
+                nn.ReLU(),
+                nn.MaxPool2d(4, stride=4), # 10x56x80
+                nn.Conv2d(10, 32, 3, padding=1),  # 32x56x80
+                nn.ReLU(),
+                nn.MaxPool2d(4, stride=4), # 32x14x20
+                nn.Conv2d(32, 64, 3, padding=1), # 64x14x20
+                nn.ReLU(),
+                nn.MaxPool2d(2, stride=2) # 64x7x10
+            )
 
-        self.fc_layer = nn.Sequential(
-            nn.Linear(64*7*10, self.action_count)
-        )
+            self.fc_layer = nn.Sequential(
+                nn.Linear(64*7*10, self.action_count)
+            )
+        elif self.image_dimension == (100,100):
+            self.conv_layer = nn.Sequential(
+                nn.Conv2d(input_dimension, 10, 6, stride=2, padding=2),
+                nn.ReLU(), # 10x50x50
+                nn.Conv2d(10, 32, 6, stride=2, padding=2),
+                nn.ReLU(), # 32x25x25
+                nn.Conv2d(32, 64, 7, stride=2, padding=2),
+                nn.ReLU() # 64x12x12
+            )
+
+            self.fc_layer = nn.Sequential(
+                nn.Linear(64*12*12, self.action_count)
+            )
+        else:
+            raise ValueError("No network available for the given image_dimension")
 
         # Increase bias to move rightwards
-        self.fc_layer[0].bias.data[10].add_(right_bias)
-
-
-    def numpy_rgb_to_grayscale(self, np_rgb_array):
-        ''' Convert an income NumPy array in (width, height, rgb) format into
-            a NumPy array in (width, height, grayscale) format '''
-        # [:,:,None] adds the singleton dimension for grayscale dropped in .dot
-        return np.dot(np_rgb_array[...,:3], [0.299, 0.587, 0.114])[:,:,None]
+        self.fc_layer[0].bias.data[10].add_(self.right_bias)
 
     def convert_screen_to_input(self, obs):
         ''' Convert the screen from an image into an array suitable for NN
@@ -74,13 +91,14 @@ class BasicConvolutionNetwork(nn.Module):
             Output:
                 Tensor(batch, color, height, width) where color in [rgb, grayscale]
         '''
-        if self.img_to_grayscale:
-            obs = self.numpy_rgb_to_grayscale(obs)
-        # Convert the obs into a PyTorch autograd Variable
-        s = Variable(torch.FloatTensor(obs))
-        # Convert from (h,w,d) to (d,h,w) and add batch dimension (unsqueeze)
-        s = s.permute(2,0,1).unsqueeze(0)
-        return s
+        pil_image = to_pil_image(obs)
+        if self.image_to_grayscale:
+            #obs = self.numpy_rgb_to_grayscale(obs)
+            pil_image = pil_image.convert('L')
+        if self.image_dimension != (320,224):
+            pil_image = pil_image.resize(self.image_dimension)
+        nn_input = Variable(to_tensor(pil_image).unsqueeze(0))
+        return nn_input
 
     def forward(self, x):
         out = self.conv_layer(x)
@@ -141,7 +159,9 @@ class BasicConvolutionNetwork(nn.Module):
         torch.save({
             'model': self.state_dict(),
             'epsilon': self.epsilon,
-            'right_bias': self.right_bias
+            'right_bias': self.right_bias,
+            'image_dimension': self.image_dimension,
+            'image_to_grayscale': self.image_to_grayscale
         }, path_or_buffer)
 
     def load(self, path_or_buffer):
@@ -149,4 +169,7 @@ class BasicConvolutionNetwork(nn.Module):
         loaded_dict = torch.load(path_or_buffer)
         self.epsilon = loaded_dict['epsilon']
         self.right_bias = loaded_dict['right_bias']
+        self.image_dimension = loaded_dict['image_dimension']
+        self.image_to_grayscale = loaded_dict['image_to_grayscale']
+        self.__init_network__()
         self.load_state_dict(loaded_dict['model'])
