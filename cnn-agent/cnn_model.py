@@ -9,10 +9,11 @@ from torch.autograd import Variable
 
 class BasicConvolutionNetwork(nn.Module):
 
-    def __init__(self, epsilon = 0.05, right_bias = 0):
+    def __init__(self, epsilon = 0.05, right_bias = 0, img_to_grayscale = False):
         ''' Initialize DQN network '''
         super(BasicConvolutionNetwork, self).__init__()
 
+        self.img_to_grayscale = img_to_grayscale
         self.epsilon = epsilon
         self.right_bias = right_bias
 
@@ -38,8 +39,10 @@ class BasicConvolutionNetwork(nn.Module):
         self.action_count = len(self.action_index_to_string_map)
 
         # Define neural network architecture
+        input_dimension = 1 if img_to_grayscale else 3
+
         self.conv_layer = nn.Sequential(
-            nn.Conv2d(3, 10, 7, padding=3),
+            nn.Conv2d(input_dimension, 10, 7, padding=3),
             nn.ReLU(),
             nn.MaxPool2d(4, stride=4), # 10x56x80
             nn.Conv2d(10, 32, 3, padding=1),  # 32x56x80
@@ -58,9 +61,21 @@ class BasicConvolutionNetwork(nn.Module):
         self.fc_layer[0].bias.data[10].add_(right_bias)
 
 
+    def numpy_rgb_to_grayscale(self, np_rgb_array):
+        ''' Convert an income NumPy array in (width, height, rgb) format into
+            a NumPy array in (width, height, grayscale) format '''
+        # [:,:,None] adds the singleton dimension for grayscale dropped in .dot
+        return np.dot(np_rgb_array[...,:3], [0.299, 0.587, 0.114])[:,:,None]
+
     def convert_screen_to_input(self, obs):
         ''' Convert the screen from an image into an array suitable for NN
-            Default Screen Size (D,H,W): 3x224x320 '''
+            Input:
+                nd.array(height, width, color) where color = rgb
+            Output:
+                Tensor(batch, color, height, width) where color in [rgb, grayscale]
+        '''
+        if self.img_to_grayscale:
+            obs = self.numpy_rgb_to_grayscale(obs)
         # Convert the obs into a PyTorch autograd Variable
         s = Variable(torch.FloatTensor(obs))
         # Convert from (h,w,d) to (d,h,w) and add batch dimension (unsqueeze)

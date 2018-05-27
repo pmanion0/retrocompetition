@@ -17,8 +17,8 @@ from cnn_evaluator import RetroEvaluator
 from cnn_argparser import CNNArgumentParser
 
 parser = CNNArgumentParser()
+# sys.argv.extend(['build', '-l', 'test_ipy'])
 args = parser.parse_args()
-# sys.argv(['build', '-l', 'test_ipy'])
 
 def main():
     s3 = RetroS3Client()
@@ -39,7 +39,8 @@ def main():
         )
         model = BasicConvolutionNetwork(
             epsilon = args.epsilon,
-            right_bias = args.right_bias
+            right_bias = args.right_bias,
+            img_to_grayscale = True
         )
     else:
         model = BasicConvolutionNetwork()
