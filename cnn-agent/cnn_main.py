@@ -18,6 +18,7 @@ from cnn_argparser import CNNArgumentParser
 
 parser = CNNArgumentParser()
 args = parser.parse_args()
+# sys.argv(['build', '-l', 'test_ipy'])
 
 def main():
     s3 = RetroS3Client()
