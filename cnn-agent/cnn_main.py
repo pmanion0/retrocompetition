@@ -40,7 +40,8 @@ def main():
         model = BasicConvolutionNetwork(
             epsilon = args.epsilon,
             right_bias = args.right_bias,
-            img_to_grayscale = True
+            image_to_grayscale = args.image_to_grayscale,
+            image_dimension = args.image_dimension
         )
     else:
         model = BasicConvolutionNetwork()
