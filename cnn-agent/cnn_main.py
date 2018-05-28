@@ -15,12 +15,17 @@ from cnn_model import BasicConvolutionNetwork
 from cnn_config import CNNConfig
 from cnn_evaluator import RetroEvaluator
 from cnn_argparser import CNNArgumentParser
+from cnn_memory import UniformReplayMemory
 
 parser = CNNArgumentParser()
 # sys.argv.extend(['build', '-l', 'test_ipy'])
 args = parser.parse_args()
 
 def main():
+    use_experience_replay = True
+    batch_size = 16
+    replay_memory_size = 10000
+
     s3 = RetroS3Client()
     model = None
     config = None
@@ -29,7 +34,6 @@ def main():
         warn("Running " + args.mode + " mode without loading existing model")
 
     if args.load_model_file == None:
-        # Define all the model and config parameters needed for training
         config = CNNConfig(
             gamma = args.gamma,
             loss_func = F.smooth_l1_loss,
@@ -62,6 +66,11 @@ def main():
         log_folder = args.log_folder
     )
 
+    memory = UniformReplayMemory(
+        memory_size = replay_memory_size,
+        batch_size = batch_size
+    )
+
     game_env = util.get_environment(args.environment)
 
     # Reset the game and get the initial screen
@@ -69,11 +78,18 @@ def main():
     current_screen = model.convert_screen_to_input(obs)
 
     while evaluator.get_count() < args.max_step_count:
-        # Get the Q value for the current screen
-        Q_estimate = model.forward(current_screen)
+        if args.mode == 'build' and use_experience_replay:
+            memory.sample_new_batch()
+            batch_states = memory.get_batch_start_including(current_screen)
+        else:
+            batch_states = current_screen
 
-        # Determine the optimal buttons to press
-        action = model.get_action(Q_estimate)
+        # Get the Q value for the current screen
+        Q_estimates = model.forward(batch_states)
+
+        # Determine the optimal buttons to press for the current screen
+        current_Q_estimate = Q_estimates[:1]
+        action = model.get_action(current_Q_estimate)
         buttons = model.convert_action_to_buttons(action)
 
         # Apply the button presses and observe the results
@@ -85,30 +101,36 @@ def main():
 
         next_screen = model.convert_screen_to_input(obs)
 
-        summary = {'Q_estimate': Q_estimate, 'action': action, 'reward': reward}
+        summary = {'Q_estimate': Q_estimates[0], 'action': action, 'reward': reward}
 
         if args.mode == 'build':
+            batch_actions, batch_rewards, batch_next_screens = \
+                memory.get_batch_post_action_including(action, reward, next_screen)
+
             # Periodically create or update a forecast model for future rewards
             if config.is_forecast_update(evaluator.get_count()):
                 forecast_model = util.clone_checkpoint_nn(model)
 
             # Estimate the future Q-value options
-            if done:
-                Q_future = torch.zeros_like(Q_estimate)
-            else:
-                Q_future = forecast_model.forward(next_screen)
+            Q_futures = forecast_model.forward(batch_next_screens)
+
+            if done: # Set future Q-values to zero if round terminated
+                Q_futures[0,:] = torch.zeros_like(Q_futures[0,:])
 
             # Calculate the loss and create a mask identifying the action taken
-            loss = config.calculate_loss(Q_estimate, reward, Q_future)
+            loss = config.calculate_loss(Q_estimates, batch_rewards, Q_futures)
             action_mask = torch.zeros_like(loss)
-            action_mask[0, action] = 1
+
+            # Fill
+            action_mask.scatter_(1, batch_actions.view(-1,1), 1.0)
 
             # Run gradient only for chosen action - zero all others with mask
             config.optimizer.zero_grad()
             loss.backward(action_mask)
             config.optimizer.step()
 
-            summary.update({'loss': loss, 'Q_future': Q_future})
+            memory.add_memory(current_screen, action, reward, next_screen)
+            summary.update({'loss': loss[0], 'Q_future': Q_futures[0]})
 
             if config.is_model_save(evaluator.get_count()) and args.output_model_file != None:
                 out_path = os.path.expanduser(args.log_folder + '/' + args.output_model_file)

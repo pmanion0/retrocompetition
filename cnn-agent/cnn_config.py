@@ -19,7 +19,7 @@ class CNNConfig:
 
     def calculate_loss(self, Q_estimated, actual_reward, Q_future):
         ''' Calculate the loss to return to the network '''
-        Q_observed = actual_reward + self.gamma * Q_future
+        Q_observed = actual_reward.view(-1,1) + self.gamma * Q_future
         Q_observed = Variable(Q_observed.data)
         return self.loss_func(Q_estimated, Q_observed, reduce=False)
 

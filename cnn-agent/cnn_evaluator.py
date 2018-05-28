@@ -21,7 +21,7 @@ class RetroEvaluator:
         common_memory = {
             'action': action,
             'reward': reward,
-            'loss': float(loss[0,action]) # Only report true observed loss
+            'loss': float(loss[action]) # Only report true observed loss
         }
         selective_memory = {
             'counter': self.counter,
@@ -37,7 +37,7 @@ class RetroEvaluator:
         if self.is_write_time():
             self.write_metrics()
 
-        print("{o}: {l}".format(o=self.counter, l=loss[0,action]))
+        print("{o}: {l}".format(o=self.counter, l=loss[action]))
         self.counter += 1
 
     def is_notable(self, common, selective):
