@@ -21,6 +21,11 @@ parser = CNNArgumentParser()
 # sys.argv.extend(['build', '-l', 'test_ipy'])
 args = parser.parse_args()
 
+if not args.disable_cuda and torch.cuda.is_available():
+    args.device = torch.device('cuda')
+else:
+    args.device = torch.device('cpu')
+
 def main():
     s3 = RetroS3Client()
     model = None
@@ -115,9 +120,8 @@ def main():
 
             # Calculate the loss and create a mask identifying the action taken
             loss = config.calculate_loss(Q_estimates, batch_rewards, Q_futures)
-            action_mask = torch.zeros_like(loss)
 
-            # Fill
+            action_mask = torch.zeros_like(loss)
             action_mask.scatter_(1, batch_actions.view(-1,1), 1.0)
 
             # Run gradient only for chosen action - zero all others with mask

@@ -54,5 +54,7 @@ def CNNArgumentParser():
                         help='maximum number of steps to train before terminating')
         p.add_argument('-m', '--load_model_file', default=None,
                         help='file to load starting model parameters from')
+        p.add_argument('--disable_cuda', action='store_true',
+                        help='disables CUDA GPU acceleration even if GPU is available')
 
     return parser
