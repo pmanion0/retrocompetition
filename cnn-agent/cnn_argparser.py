@@ -29,7 +29,12 @@ def CNNArgumentParser():
                         help='toggle to convert input RGB image to grayscale')
     build.add_argument('--image_dimension', default=(320,224), type=dimension_parser,
                         help='the "width,height" to resize images for network')
-
+    build.add_argument('--use_experience_replay', action='store_true',
+                        help='toggle to turn on batch-replay during training')
+    build.add_argument('--batch_size', default=16, type=int,
+                        help='size of replay batches inclusive of latest screen')
+    build.add_argument('--memory_size', default=10000, type=int,
+                        help='memory size to draw experiences from during replay')
 
     # Add VALIDATE only arguments
     validate = subparser.add_parser('validate',

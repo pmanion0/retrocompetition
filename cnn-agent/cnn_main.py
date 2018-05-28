@@ -22,10 +22,6 @@ parser = CNNArgumentParser()
 args = parser.parse_args()
 
 def main():
-    use_experience_replay = True
-    batch_size = 16
-    replay_memory_size = 10000
-
     s3 = RetroS3Client()
     model = None
     config = None
@@ -67,8 +63,8 @@ def main():
     )
 
     memory = UniformReplayMemory(
-        memory_size = replay_memory_size,
-        batch_size = batch_size
+        memory_size = args.memory_size,
+        batch_size = args.batch_size
     )
 
     game_env = util.get_environment(args.environment)
@@ -78,7 +74,7 @@ def main():
     current_screen = model.convert_screen_to_input(obs)
 
     while evaluator.get_count() < args.max_step_count:
-        if args.mode == 'build' and use_experience_replay:
+        if args.mode == 'build' and args.use_experience_replay:
             memory.sample_new_batch()
             batch_states = memory.get_batch_start_including(current_screen)
         else:
