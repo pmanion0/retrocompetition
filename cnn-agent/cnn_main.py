@@ -78,13 +78,13 @@ def main():
             memory.sample_new_batch()
             batch_states = memory.get_batch_start_including(current_screen)
         else:
-            batch_states = current_screen
+            batch_states = current_screen.unsqueeze(0)
 
         # Get the Q value for the current screen
         Q_estimates = model.forward(batch_states)
 
         # Determine the optimal buttons to press for the current screen
-        current_Q_estimate = Q_estimates[:1]
+        current_Q_estimate = Q_estimates[0]
         action = model.get_action(current_Q_estimate)
         buttons = model.convert_action_to_buttons(action)
 

@@ -46,7 +46,7 @@ class BasicConvolutionNetwork(nn.Module):
         self.__init_network__()
 
     def __init_network__(self):
-        # Define neural network architecture
+        ''' Create the actual neural network after basic initialization '''
         input_dimension = 1 if self.image_to_grayscale else 3
 
         if self.image_dimension == (320,224):
@@ -86,10 +86,13 @@ class BasicConvolutionNetwork(nn.Module):
 
     def convert_screen_to_input(self, obs):
         ''' Convert the screen from an image into an array suitable for NN
-            Input:
-                nd.array(height, width, color) where color = rgb
-            Output:
-                Tensor(batch, color, height, width) where color in [rgb, grayscale]
+
+        Args:
+            NumPy array [height,width,color] where color is RGB (3 dimensions)
+
+        Returns:
+            a single-screen tensor [color, width, height] where color is either
+            RGB (3 dimensions) or grayscale (1 dimension)
         '''
         pil_image = to_pil_image(obs)
         if self.image_to_grayscale:
@@ -97,7 +100,7 @@ class BasicConvolutionNetwork(nn.Module):
             pil_image = pil_image.convert('L')
         if self.image_dimension != (320,224):
             pil_image = pil_image.resize(self.image_dimension)
-        nn_input = Variable(to_tensor(pil_image).unsqueeze(0))
+        nn_input = Variable(to_tensor(pil_image))
         return nn_input
 
     def forward(self, x):
@@ -107,21 +110,29 @@ class BasicConvolutionNetwork(nn.Module):
         return out
 
     def turn_off_gradients(self):
+        ''' Turns off gradient storage for this model, used for forecast models
+            or during evaluation/testing of a pre-trained model '''
         for param in self.conv_layer.parameters():
             param.requires_grad = False
         for param in self.fc_layer.parameters():
             param.requires_grad = False
 
-    def get_buttons(self, q_values):
-        ''' Return an epsilon-greedy optimal policy given the Q values '''
-        action = self.get_action(q_values)
-        button_array = self.convert_action_to_buttons(action)
-        return button_array
-
     def convert_action_to_buttons(self, action):
         ''' Convert list of actions to press (as strings) into an array with
             each button to press to pass into simulation, e.g.
-            ["UP","B"] -> [1,0,0,0,1,0,0,0,0,0,0,0] '''
+            ["UP","B"] ->
+
+        Args:
+            action (int): index of the action to convert
+
+        Returns:
+            np.array of size count(buttons) with a 1 for each button that the
+            action index implies should be pressed and 0 for all other buttons
+
+        Example:
+            >>> m.convert_action_to_buttons(1) # equals ["UP","LEFT","A"]
+            np.array([0,1,0,0,1,0,1,0,0,0,0,0])
+        '''
         button_array = np.array([0] * self.button_count)
         action_str = self.action_index_to_string_map[action]
         for a in action_str:
@@ -129,7 +140,15 @@ class BasicConvolutionNetwork(nn.Module):
         return button_array
 
     def get_action(self, q_values):
-        ''' Return an epsilon-greedy optimal policy given the Q values '''
+        ''' Return an epsilon-greedy optimal policy given the Q values
+
+        Args:
+            q_values (tensor): tensor of size [count(actions)] with the
+                expected Q-value that will result from taking each action
+
+        Returns:
+            int with the epsilon-greedy action index to pick
+        '''
         if random() < self.epsilon:
             action = self.get_random_action()
         else:
@@ -137,17 +156,42 @@ class BasicConvolutionNetwork(nn.Module):
         return action
 
     def get_random_action(self):
-        ''' Return an action array with a single random action '''
+        ''' Return an action array with a single random action
+
+        Returns:
+            int with a random action index to take
+        '''
         random_action_index = randint(0, self.action_count-1)
         return random_action_index
 
     def get_best_q_action(self, q_values):
-        ''' Return an action array with the high Q-value action chosen '''
-        best_action_index = int(q_values.max(1)[1])
+        ''' Return an action array with the high Q-value action chosen
+
+        Args:
+            q_values (tensor): tensor of size [count(actions)] with the
+                expected Q-value that will result from taking each action
+
+        Returns:
+            int with the best (maximal Q-value) action index to pick
+        '''
+        best_action_index = int(q_values.argmax(dim=0))
         return best_action_index
 
     def buttons_to_string(self, button_array):
-        ''' Convert array of button presses into an interpretable string '''
+        ''' Convert array of button presses into an interpretable string
+
+        Args:
+            button_array (np.array): array of size count(buttons) with 0 if the
+                button is not pressed and 1 if it is pressed
+
+        Returns:
+            string showing each button pressed with ' + ' between them
+
+        Example:
+            >>> buttons = np.array([1,0,0,0,1,0,0,0,0,0,0,0])
+            >>> b.buttons_to_string(buttons)
+            'B + UP'
+        '''
         return ' + '.join([
             self.button_index_list[index]
             for index, value in enumerate(button_array)

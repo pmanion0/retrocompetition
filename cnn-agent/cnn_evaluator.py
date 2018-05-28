@@ -4,41 +4,56 @@ from time import time
 
 class RetroEvaluator:
 
-    def __init__(self, log_folder, min_write_gap = 30, queue_memory = 100):
+    def __init__(self, log_folder, min_write_gap = 30, queue_memory = 100,
+                print_log_messages = True):
         self.s3 = RetroS3Client()
         self.counter = 0
         self.write_number = 0
         self.last_write_time = time()
 
+        self.print_log_messages = print_log_messages
         self.min_write_gap = min_write_gap
         self.common_memory = deque([], queue_memory)
         self.selective_memory = deque([], queue_memory)
         self.log_folder = log_folder
 
-    def summarize_step(self, Q_estimate = None, action = None, reward = None,
+    def summarize_step(self, Q_estimate, action, reward,
                        loss = None, Q_future = None, next_screen = None):
-        ''' Provides evaluator the summary of the last step '''
+        ''' Provides evaluator the summary of the last step
+
+        Args:
+            Q_estimate (tensor):
+            action (int):
+            reward (float):
+            loss (tensor, optional):
+            Q_future (tensor, optional):
+            next_screen (tensor, optional): 
+        '''
         common_memory = {
+            'counter': self.counter,
             'action': action,
             'reward': reward,
-            'loss': float(loss[action]) # Only report true observed loss
+            'loss': loss if type(loss) is float or loss is None else float(loss[action])
         }
         selective_memory = {
-            'counter': self.counter,
             'Q_estimate': Q_estimate,
             'Q_future': Q_future,
             'screen': next_screen
         }
 
         self.common_memory.append(common_memory)
+        self.counter += 1
+
         if self.is_notable(common_memory, selective_memory):
             self.selective_memory.append(selective_memory)
-
         if self.is_write_time():
             self.write_metrics()
+        if self.print_log_messages:
+            self.print_log_message(common_memory, selective_memory)
 
-        print("{o}: {l}".format(o=self.counter, l=loss[action]))
-        self.counter += 1
+    def print_log_message(self, common, selective):
+        ''' Print logging messages to STDOUT '''
+        print("{o}: {l}".format(o=common['counter'], l=common['loss']))
 
     def is_notable(self, common, selective):
         ''' Return whether the step was notable enough to output more advanced
