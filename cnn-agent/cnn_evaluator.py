@@ -8,7 +8,7 @@ class RetroEvaluator:
 
     def __init__(self,
                 log_folder,
-                log_system = 'redis',
+                log_system = 's3',
                 min_write_gap = 30,
                 queue_memory = 100,
                 print_log_messages = True,
@@ -31,6 +31,8 @@ class RetroEvaluator:
             self.redis = redis.StrictRedis(host=redis_host, port=redis_port)
             self.redis_pipeline = self.redis.pipeline()
             self.redis.rpush('model_names', self.log_folder)
+            # TODO: Add logic to check for existence of model and remove
+            # previous writes if present
         else:
             pass #self.log_system = open('')
 
