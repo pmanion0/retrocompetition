@@ -56,6 +56,8 @@ def main():
         model.load(model_buffer)
         config.load(config_buffer)
 
+    model.to(args.device)
+    #config.to(args.device)
     config.init_optimizer(model.parameters())
 
     # Set network to eval mode and do not track gradient if not training
@@ -81,12 +83,11 @@ def main():
     while evaluator.get_count() < args.max_step_count:
         if args.mode == 'build' and args.use_experience_replay:
             memory.sample_new_batch()
-            batch_states = memory.get_batch_start_including(current_screen)
-        else:
-            batch_states = current_screen.unsqueeze(0)
+
+        batch_states = memory.get_batch_start_including(current_screen)
 
         # Get the Q value for the current screen
-        Q_estimates = model.forward(batch_states)
+        Q_estimates = model.forward(batch_states.to(args.device))
 
         # Determine the optimal buttons to press for the current screen
         current_Q_estimate = Q_estimates[0]
@@ -108,12 +109,16 @@ def main():
             batch_actions, batch_rewards, batch_next_screens = \
                 memory.get_batch_post_action_including(action, reward, next_screen)
 
+            batch_actions = batch_actions.to(args.device)
+            batch_rewards = batch_rewards.to(args.device)
+
             # Periodically create or update a forecast model for future rewards
             if config.is_forecast_update(evaluator.get_count()):
                 forecast_model = util.clone_checkpoint_nn(model)
+                forecast_model.to(args.device)
 
             # Estimate the future Q-value options
-            Q_futures = forecast_model.forward(batch_next_screens)
+            Q_futures = forecast_model.forward(batch_next_screens.to(args.device))
 
             if done: # Set future Q-values to zero if round terminated
                 Q_futures[0,:] = torch.zeros_like(Q_futures[0,:])
