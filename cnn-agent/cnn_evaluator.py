@@ -113,13 +113,25 @@ class RetroEvaluator:
         pipe.incrby(name + ':count', len(self.common_memory))
         pipe.execute()
 
+    def write_metrics_local(self, metric_type):
+        pass
+
+    def write_metrics_to_system(self, metric_type):
+        ''' '''
+        if self.log_system == 's3':
+            self.write_metrics_s3(metric_type)
+        elif self.log_system == 'redis':
+            self.write_metrics_s3(metric_type)
+        else:
+            self.write_metrics_local(metric_type)
+
     def write_metrics(self):
         ''' Write out the latest memory and update last write time '''
-        self.write_common_memory()
+        self.write_metrics_to_system('common')
         self.common_memory.clear()
 
         if len(self.selective_memory) > 0:
-            self.write_selective_memory()
+            self.write_metrics_to_system('selective')
             self.selective_memory.clear()
 
         self.write_number += 1
