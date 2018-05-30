@@ -121,7 +121,7 @@ class RetroEvaluator:
         if self.log_system == 's3':
             self.write_metrics_s3(metric_type)
         elif self.log_system == 'redis':
-            self.write_metrics_s3(metric_type)
+            self.write_metrics_redis(metric_type)
         else:
             self.write_metrics_local(metric_type)
 
