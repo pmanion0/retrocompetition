@@ -49,12 +49,12 @@ class RetroEvaluator:
             next_screen (tensor, optional):
         '''
         common_memory = {
-            'counter': self.counter,
             'action': action,
             'reward': reward,
             'loss': loss if type(loss) is float or loss is None else float(loss[action])
         }
         selective_memory = {
+            'counter': self.counter,
             'Q_estimate': Q_estimate,
             'Q_future': Q_future,
             'screen': next_screen
@@ -72,7 +72,7 @@ class RetroEvaluator:
 
     def print_log_message(self, common, selective):
         ''' Print logging messages to STDOUT '''
-        print("{o}: {l}".format(o=common['counter'], l=common['loss']))
+        print("{o}: {l}".format(o=self.counter, l=common['loss']))
 
     def is_notable(self, common, selective):
         ''' Return whether the step was notable enough to output more advanced
@@ -110,8 +110,10 @@ class RetroEvaluator:
                 pipe.rpush(name + ':loss', m['loss'])
         elif metric_type == 'selective':
             for m in self.selective_memory:
-                pipe.rpush(name + ':q_estimate', m['Q_estimate'][0])
-                # TODO: Finish selective memory approach
+                pipe.rpush(name + ':selective_times', m['counter'])
+                pipe.set(name + ':q_estimate:' + m['counter'], m['Q_estimate'][0])
+                pipe.set(name + ':q_future:' + m['counter'], m['Q_future'][0])
+                pipe.set(name + ':screen:' + m['counter'], m['screen'])
         pipe.incrby(name + ':count', len(self.common_memory))
         pipe.execute()
 
